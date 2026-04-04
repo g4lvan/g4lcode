@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>g4lcode — Editor</title>
+  <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d0e16;
+      --surface:     #13141e;
+      --border:      #252838;
+      --accent:      #a78bfa;
+      --accent2:     #34d399;
+      --accent3:     #fbbf24;
+      --accent4:     #f472b6;
+      --accent-dim:  rgba(167,139,250,.09);
+      --accent-mid:  rgba(167,139,250,.17);
+      --accent-soft: rgba(167,139,250,.22);
+      --text:        #e8eaf8;
+      --muted:       #6572a0;
+      --console-bg:  #090a12;
+      --tab-h:       42px;
+      --bar-h:       52px;
+      --font-ui:     'Syne', sans-serif;
+      --font-code:   'JetBrains Mono', monospace;
+    }
+
+    /* ── ONE DARK PRO theme overrides ── */
+    :root[data-theme="one-dark-pro"] {
+      --bg:          #21252b;
+      --surface:     #282c34;
+      --border:      #3e4451;
+      --accent:      #61afef;
+      --accent2:     #98c379;
+      --accent3:     #e5c07b;
+      --accent4:     #c678dd;
+      --accent-dim:  rgba(97,175,239,.08);
+      --accent-mid:  rgba(97,175,239,.15);
+      --accent-soft: rgba(97,175,239,.18);
+      --text:        #abb2bf;
+      --muted:       #5c6370;
+      --console-bg:  #1a1d23;
+    }
+
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
+
+    /* Smooth theme transitions */
+    #topbar, #sidebar, #editor-tabs, #preview-topbar,
+    #console-panel, #console-topbar, #statusbar,
+    .lang-btn, .etab, .btn, #resizer {
+      transition: background-color .25s ease, border-color .25s ease, color .25s ease;
+    }
+
+    /* ── TOP BAR ── */
+    #topbar {
+      height: var(--bar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; gap: 16px;
+      position: relative; z-index: 10;
+    }
+    .logo {
+      font-size: 1.15rem; font-weight: 800; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; -webkit-text-fill-color: transparent;;
+    }
+    .logo span { -webkit-text-fill-color: var(--muted); font-weight: 400; font-size: 0.8rem; margin-left: 6px; }
+
+    .topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+    .btn {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text); font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600;
+      padding: 6px 14px; border-radius: 6px; cursor: pointer; letter-spacing: 0.3px;
+      transition: all .18s ease; display: flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: #6a59e0; border-color: #6a59e0; color: #fff; }
+
+    .indicator { width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+
+    /* ── LAYOUT ── */
+    #app-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - var(--bar-h));
+    }
+    #layout {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── SIDEBAR (language tabs, vertical) ── */
+    #sidebar {
+      width: 52px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 12px 0; gap: 4px;
+    }
+    .lang-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: none; cursor: pointer;
+      font-family: var(--font-code); font-size: 0.6rem; font-weight: 600;
+      color: var(--muted); background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .18s; letter-spacing: 0.5px; text-transform: uppercase;
+      position: relative; flex-direction: column; gap: 1px;
+    }
+    .lang-btn:hover { background: var(--border); color: var(--text); }
+    .lang-btn.active { background: var(--accent-soft); color: var(--accent); }
+    .lang-btn .dot {
+      width: 4px; height: 4px; border-radius: 50%; position: absolute; bottom: 4px;
+      opacity: 0; transition: opacity .18s;
+    }
+    .lang-btn.active .dot { opacity: 1; }
+    .lang-btn[data-lang="html"] .dot  { background: #f7895a; }
+    .lang-btn[data-lang="css"] .dot   { background: #64b5f6; }
+    .lang-btn[data-lang="js"] .dot    { background: var(--accent3); }
+    .lang-btn[data-lang="md"] .dot    { background: var(--accent2); }
+
+    .sidebar-sep { width: 28px; height: 1px; background: var(--border); margin: 6px 0; }
+
+    /* ── EDITOR PANEL ── */
+    #editor-panel {
+      flex: 1; display: flex; flex-direction: column; min-width: 0;
+    }
+
+    #editor-tabs {
+      height: var(--tab-h); background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 12px; gap: 2px;
+    }
+    .etab {
+      height: 28px; padding: 0 14px; border-radius: 5px; font-size: 0.75rem;
+      font-family: var(--font-code); font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 7px; color: var(--muted);
+      border: none; background: transparent; transition: all .15s;
+    }
+    .etab .etab-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .etab[data-lang="html"] .etab-dot  { background: #f7895a; }
+    .etab[data-lang="css"] .etab-dot   { background: #64b5f6; }
+    .etab[data-lang="js"] .etab-dot    { background: var(--accent3); }
+    .etab[data-lang="md"] .etab-dot    { background: var(--accent2); }
+    .etab.active { background: var(--bg); color: var(--text); }
+    .etab:hover:not(.active) { background: var(--border); color: var(--text); }
+
+    #monaco-container { flex: 1; position: relative; }
+
+    /* ── RESIZER ── */
+    #resizer {
+      width: 5px; background: var(--border); cursor: col-resize;
+      transition: background .15s; flex-shrink: 0; position: relative;
+    }
+    #resizer:hover, #resizer.dragging { background: var(--accent); }
+    #resizer::after {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 2px; height: 32px; border-radius: 2px; background: inherit;
+    }
+
+    /* ── PREVIEW PANEL ── */
+    /* ── TOGGLE VIEW BUTTONS ── */
+    .btn-toggle {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--muted); font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600;
+      padding: 6px 12px; border-radius: 6px; cursor: pointer; letter-spacing: 0.3px;
+      transition: all .18s ease; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .btn-toggle.active { background: var(--accent-mid); border-color: var(--accent); color: var(--accent); }
+    .btn-toggle .tgl-icon { font-size: 0.85rem; transition: opacity .15s; }
+    .btn-toggle.hidden-panel { color: var(--muted); border-style: dashed; }
+
+    /* ── PREVIEW PANEL ── */
+    #preview-panel {
+      width: 45%; display: flex; flex-direction: column; min-width: 0;
+      flex-shrink: 0; transition: width .25s ease;
+    }
+    /* Solo se oculta el contenido visual, no el panel entero */
+    #preview-panel.preview-hidden #preview-topbar,
+    #preview-panel.preview-hidden #preview-body { display: none; }
+    /* Si preview oculto Y consola oculta → panel desaparece */
+    #preview-panel.fully-hidden {
+      width: 0 !important; overflow: hidden; pointer-events: none;
+    }
+    #resizer.panel-hidden { display: none; }
+
+    #preview-topbar {
+      height: var(--tab-h); background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 14px; gap: 10px;
+      flex-shrink: 0;
+    }
+    #preview-body {
+      flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+    }
+    .preview-label { font-size: 0.73rem; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+    .traffic-lights { display: flex; gap: 5px; margin-right: 4px; }
+    .tl { width: 10px; height: 10px; border-radius: 50%; }
+    .tl.red    { background: #ff5f57; }
+    .tl.yellow { background: #febc2e; }
+    .tl.green  { background: #28c840; }
+
+    #preview-body {
+      flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+    }
+    #preview-frame {
+      flex: 1; border: none; background: #fff; min-height: 0;
+    }
+
+    /* ── MD PREVIEW — GitHub style ── */
+    #md-preview {
+      flex: 1; overflow-y: auto; min-height: 0;
+      background: #0d1117;
+      display: none;
+      padding: 32px 40px 48px;
+      box-sizing: border-box;
+    }
+    #md-preview::-webkit-scrollbar { width: 8px; }
+    #md-preview::-webkit-scrollbar-track { background: var(--bg); }
+    #md-preview::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    #md-preview::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    /* inner wrapper for max-width like GitHub */
+    #md-preview .gh-body {
+      max-width: 740px; margin: 0 auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px; line-height: 1.6; color: #e6edf3;
+    }
+
+    /* headings */
+    #md-preview h1,
+    #md-preview h2,
+    #md-preview h3,
+    #md-preview h4,
+    #md-preview h5,
+    #md-preview h6 {
+      margin-top: 24px; margin-bottom: 16px;
+      font-weight: 600; line-height: 1.25; color: #e6edf3;
+    }
+    #md-preview h1 { font-size: 2em; padding-bottom: .3em; border-bottom: 1px solid #30363d; }
+    #md-preview h2 { font-size: 1.5em; padding-bottom: .3em; border-bottom: 1px solid #30363d; }
+    #md-preview h3 { font-size: 1.25em; }
+    #md-preview h4 { font-size: 1em; }
+    #md-preview h5 { font-size: .875em; }
+    #md-preview h6 { font-size: .85em; color: #7d8590; }
+
+    /* paragraph & inline */
+    #md-preview p { margin-top: 0; margin-bottom: 16px; }
+    #md-preview strong { font-weight: 600; color: #e6edf3; }
+    #md-preview em { font-style: italic; }
+    #md-preview del { text-decoration: line-through; color: #7d8590; }
+
+    /* links */
+    #md-preview a { color: #4493f8; text-decoration: none; }
+    #md-preview a:hover { text-decoration: underline; }
+
+    /* lists */
+    #md-preview ul, #md-preview ol { margin-top: 0; margin-bottom: 16px; padding-left: 2em; }
+    #md-preview li { margin-top: 4px; }
+    #md-preview li + li { margin-top: 4px; }
+    #md-preview li > p { margin-top: 16px; }
+
+    /* task lists */
+    #md-preview input[type="checkbox"] { margin-right: 6px; }
+
+    /* blockquote */
+    #md-preview blockquote {
+      margin: 0 0 16px; padding: 0 1em;
+      color: #7d8590; border-left: 4px solid #3d444d;
+    }
+    #md-preview blockquote > :first-child { margin-top: 0; }
+    #md-preview blockquote > :last-child  { margin-bottom: 0; }
+
+    /* code inline */
+    #md-preview code {
+      padding: .2em .4em; margin: 0;
+      font-size: 85%; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      background: rgba(110,118,129,.4); border-radius: 6px; color: #e6edf3;
+    }
+
+    /* code block */
+    #md-preview pre {
+      margin-bottom: 16px; padding: 16px; overflow: auto;
+      font-size: 85%; line-height: 1.45;
+      background: #161b22; border-radius: 6px; border: 1px solid #30363d;
+    }
+    #md-preview pre code {
+      padding: 0; background: transparent; border-radius: 0;
+      font-size: 100%; color: #e6edf3; white-space: pre;
+    }
+
+    /* hr */
+    #md-preview hr {
+      height: 4px; padding: 0; margin: 24px 0;
+      background: #30363d; border: none; border-radius: 2px;
+    }
+
+    /* tables */
+    #md-preview table {
+      border-collapse: collapse; width: 100%; margin-bottom: 16px;
+      display: block; overflow-x: auto;
+    }
+    #md-preview th, #md-preview td {
+      padding: 6px 13px; border: 1px solid #30363d;
+    }
+    #md-preview th { font-weight: 600; background: #161b22; }
+    #md-preview tr:nth-child(2n) { background: #161b22; }
+
+    /* images */
+    #md-preview img { max-width: 100%; box-sizing: border-box; border-radius: 6px; }
+
+    /* details/summary */
+    #md-preview details { margin-bottom: 16px; }
+    #md-preview summary { cursor: pointer; color: #4493f8; }
+
+    /* kbd */
+    #md-preview kbd {
+      display: inline-block; padding: 3px 5px; font-family: var(--font-code);
+      font-size: 11px; line-height: 10px; color: #e6edf3;
+      vertical-align: middle; background-color: #161b22;
+      border: 1px solid #30363d; border-radius: 6px; box-shadow: inset 0 -1px 0 #30363d;
+    }
+
+    /* ── CONSOLE PANEL ── */
+    #console-panel {
+      height: 180px; min-height: 28px;
+      background: var(--console-bg); border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; flex-shrink: 0;
+      transition: height .2s ease;
+    }
+    #console-panel.collapsed { height: 28px; }
+    #console-panel.force-hidden {
+      height: 0 !important; min-height: 0 !important;
+      overflow: hidden; border-top: none;
+    }
+    /* Cuando preview está oculto, consola se expande para llenar el panel */
+    #console-panel.console-expand {
+      flex: 1;
+      height: auto !important;
+      min-height: 0;
+    }
+
+    /* ── MODO CHROME DEVTOOLS ── */
+    #btn-devtools {
+      font-size: 0.65rem; color: var(--muted); background: none;
+      border: 1px solid transparent; cursor: pointer;
+      padding: 2px 7px; border-radius: 4px; font-family: var(--font-ui);
+      font-weight: 600; letter-spacing: 0.3px; transition: all .15s;
+      display: flex; align-items: center; gap: 4px;
+    }
+    #btn-devtools:hover { color: var(--text); background: var(--border); }
+    #btn-devtools.active {
+      color: var(--accent); background: var(--accent-dim);
+      border-color: var(--accent);
+    }
+
+    /* Líneas de verbose (declaraciones) */
+    .cline.verbose .cline-text { color: #8b8fa8; font-style: italic; }
+    .cline-icon.verbose { color: #5a5f75; }
+    .cline.verbose { border-bottom-color: rgba(255,255,255,0.02); }
+
+    /* Estilos Chrome-like cuando modo devtools activo */
+    #console-panel.devtools-mode #console-topbar {
+      background: #1e2028; border-bottom: 2px solid var(--accent);
+    }
+    #console-panel.devtools-mode #console-output {
+      background: #1a1b23;
+    }
+    #console-panel.devtools-mode .cline {
+      border-bottom-color: rgba(255,255,255,0.05);
+      font-size: 11.5px;
+    }
+    #console-panel.devtools-mode .cline.log .cline-text { color: #dcdfe8; }
+    #console-panel.devtools-mode .cline.info { background: rgba(100,181,246,0.06); }
+    #console-panel.devtools-mode .cline.warn { background: rgba(247,201,72,0.08); }
+    #console-panel.devtools-mode .cline.error { background: rgba(244,112,103,0.10); }
+    #console-panel.devtools-mode .cline-time { color: #4a5068; font-size: 9px; }
+
+    #console-topbar {
+      height: 28px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 10px; gap: 8px;
+      flex-shrink: 0; cursor: pointer; user-select: none;
+    }
+    #console-topbar:hover { background: var(--border); }
+    .console-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--muted); flex: 1; }
+    #console-badge {
+      background: var(--accent3); color: #000; font-size: 0.6rem; font-weight: 800;
+      padding: 1px 6px; border-radius: 10px; display: none;
+    }
+    #console-badge.has-errors { background: #f47067; }
+    #console-badge.visible { display: inline-block; }
+    .console-toggle { font-size: 0.65rem; color: var(--muted); transition: transform .2s; }
+    #console-panel.collapsed .console-toggle { transform: rotate(180deg); }
+
+    #console-btn-clear {
+      font-size: 0.65rem; color: var(--muted); background: none; border: none; cursor: pointer;
+      padding: 2px 6px; border-radius: 4px; font-family: var(--font-ui);
+    }
+    #console-btn-clear:hover { color: var(--text); background: var(--border); }
+
+    /* Console resizer — ancho completo */
+    #console-resizer {
+      height: 4px; cursor: row-resize; background: transparent; flex-shrink: 0;
+      width: 100%; transition: background .15s;
+    }
+    #console-resizer:hover { background: var(--accent); }
+    #console-resizer.hidden { display: none; }
+
+    #console-output {
+      flex: 1; overflow-y: auto; font-family: var(--font-code); font-size: 12px;
+      padding: 4px 0; min-height: 0;
+      background: var(--console-bg);
+    }
+    #console-output::-webkit-scrollbar { width: 4px; }
+    #console-output::-webkit-scrollbar-track { background: transparent; }
+    #console-output::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .cline {
+      display: flex; align-items: baseline; gap: 0; padding: 2px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.03); line-height: 1.6;
+      transition: background .1s;
+    }
+    .cline:hover { background: rgba(255,255,255,0.03); }
+    .cline-icon { width: 18px; flex-shrink: 0; font-size: 10px; }
+    .cline-text { flex: 1; white-space: pre-wrap; word-break: break-all; color: var(--text); }
+    .cline-time { font-size: 10px; color: var(--muted); flex-shrink: 0; margin-left: 8px; }
+
+    .cline.log  .cline-text { color: #c9d1e8; }
+    .cline.info .cline-text { color: #64b5f6; }
+    .cline.warn { background: rgba(247,201,72,.05); }
+    .cline.warn .cline-text { color: var(--accent3); }
+    .cline.error { background: rgba(244,112,103,.08); }
+    .cline.error .cline-text { color: #f47067; }
+    .cline.system .cline-text { color: var(--muted); font-style: italic; }
+
+    .cline-icon.log   { color: var(--muted); }
+    .cline-icon.info  { color: #64b5f6; }
+    .cline-icon.warn  { color: var(--accent3); }
+    .cline-icon.error { color: #f47067; }
+    .cline-icon.system { color: var(--muted); }
+
+    #console-empty {
+      display: flex; align-items: center; justify-content: center;
+      height: 100%; color: var(--muted); font-size: 0.75rem; font-family: var(--font-ui);
+      flex-direction: column; gap: 6px; pointer-events: none;
+    }
+    #console-empty .ce-icon { font-size: 1.4rem; opacity: 0.4; }
+
+    /* ── REPL INPUT ── */
+    #console-repl {
+      display: flex; align-items: center; gap: 6px;
+      border-top: 1px solid var(--border);
+      padding: 4px 10px; flex-shrink: 0;
+      background: var(--console-bg);
+    }
+    #repl-prompt {
+      color: var(--accent2); font-family: var(--font-code);
+      font-size: 12px; font-weight: 700; user-select: none; flex-shrink: 0;
+    }
+    #repl-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      font-family: var(--font-code); font-size: 12px; color: var(--text);
+      caret-color: var(--accent);
+    }
+    #repl-input::placeholder { color: var(--muted); }
+    /* línea de input del usuario en el output */
+    .cline.repl-in .cline-text  { color: var(--text); }
+    .cline-icon.repl-in         { color: var(--accent2); }
+    .cline.repl-out .cline-text { color: #c9d1e8; }
+    .cline-icon.repl-out        { color: var(--muted); }
+    .cline.repl-err .cline-text { color: #f47067; }
+    .cline-icon.repl-err        { color: #f47067; }
+
+    /* ── STATUS BAR ── */
+    #statusbar {
+      height: 24px; background: var(--accent); display: flex; align-items: center;
+      padding: 0 16px; gap: 20px; font-size: 0.68rem; font-weight: 600;
+      color: rgba(255,255,255,0.9); letter-spacing: 0.4px;
+    }
+    #statusbar span { display: flex; align-items: center; gap: 5px; }
+    #statusbar .sep { opacity: 0.3; }
+
+    /* ── FONT SIZE CONTROL ── */
+    .fontsize-wrap {
+      display: flex; align-items: center; gap: 4px;
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 0 6px; height: 32px;
+    }
+    .fontsize-wrap:hover { border-color: var(--accent); }
+    .fs-label {
+      font-size: 0.7rem; font-weight: 600; color: var(--muted);
+      letter-spacing: 0.3px; white-space: nowrap; padding: 0 2px;
+    }
+    #fs-value {
+      font-size: 0.78rem; font-weight: 700; color: var(--text);
+      min-width: 22px; text-align: center;
+    }
+    .fs-btn {
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      font-size: 1rem; line-height: 1; padding: 0 3px;
+      transition: color .15s; display: flex; align-items: center;
+    }
+    .fs-btn:hover { color: var(--accent); }
+
+    /* ── THEME SELECTOR ── */
+    .theme-select-wrap { position: relative; display: flex; align-items: center; }
+    #theme-select {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text); font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600;
+      padding: 6px 10px 6px 28px; border-radius: 6px; cursor: pointer; letter-spacing: 0.3px;
+      transition: all .18s ease; appearance: none; -webkit-appearance: none;
+    }
+    #theme-select:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    #theme-select option { background: #1e1e2e; color: #e2e4f0; }
+    .theme-icon {
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      font-size: 0.8rem; pointer-events: none;
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 20px; font-size: 0.8rem; color: var(--accent2);
+      display: flex; align-items: center; gap: 8px;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+      opacity: 0; pointer-events: none; z-index: 999;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="logo">g4lcode <span>beta</span></div>
+    <div class="indicator" id="live-dot" title="Preview en vivo activo"></div>
+  </div>
+  <div class="topbar-actions">
+    <div class="theme-select-wrap" title="Cambiar tema del editor">
+      <span class="theme-icon">🎨</span>
+      <select id="theme-select">
+        <option value="codeflow">g4lcode</option>
+        <option value="one-dark-pro">One Dark Pro</option>
+      </select>
+    </div>
+    <div class="fontsize-wrap" title="Tamaño de fuente">
+      <button class="fs-btn" id="fs-down" title="Reducir fuente">−</button>
+      <span class="fs-label">A</span>
+      <span id="fs-value">13</span>
+      <button class="fs-btn" id="fs-up" title="Aumentar fuente">+</button>
+    </div>
+    <button class="btn" id="btn-share" title="Copiar código como URL">⬡ Compartir</button>
+    <button class="btn" id="btn-reset">↺ Reset</button>
+    <div style="width:1px;height:20px;background:var(--border);flex-shrink:0"></div>
+    <button class="btn-toggle active" id="btn-toggle-preview" title="Mostrar/ocultar vista previa">
+      <span class="tgl-icon">⬜</span> Preview
+    </button>
+    <button class="btn-toggle active" id="btn-toggle-console" title="Mostrar/ocultar consola">
+      <span class="tgl-icon">▸</span> Consola
+    </button>
+    <button class="btn primary" id="btn-format">⌥ Formatear</button>
+  </div>
+</div>
+
+<!-- APP WRAPPER -->
+<div id="app-wrapper">
+
+<!-- LAYOUT -->
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <button class="lang-btn active" data-lang="html" title="HTML">
+      &lt;/&gt;
+      <span class="dot"></span>
+    </button>
+    <button class="lang-btn" data-lang="css" title="CSS">
+      { }
+      <span class="dot"></span>
+    </button>
+    <button class="lang-btn" data-lang="js" title="JavaScript">
+      JS
+      <span class="dot"></span>
+    </button>
+    <div class="sidebar-sep"></div>
+    <button class="lang-btn" data-lang="md" title="Markdown">
+      MD
+      <span class="dot"></span>
+    </button>
+  </div>
+
+  <!-- EDITOR PANEL -->
+  <div id="editor-panel">
+    <div id="editor-tabs">
+      <button class="etab active" data-lang="html"><span class="etab-dot"></span>index.html</button>
+      <button class="etab" data-lang="css"><span class="etab-dot"></span>style.css</button>
+      <button class="etab" data-lang="js"><span class="etab-dot"></span>script.js</button>
+      <button class="etab" data-lang="md"><span class="etab-dot"></span>readme.md</button>
+    </div>
+    <div id="monaco-container"></div>
+  </div>
+
+  <!-- RESIZER -->
+  <div id="resizer"></div>
+
+  <!-- PREVIEW PANEL -->
+  <div id="preview-panel">
+    <div id="preview-topbar">
+      <div class="traffic-lights">
+        <div class="tl red"></div>
+        <div class="tl yellow"></div>
+        <div class="tl green"></div>
+      </div>
+      <span class="preview-label">Vista previa</span>
+    </div>
+    <div id="preview-body">
+      <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin allow-modals allow-forms" style="flex:1;border:none;background:#fff;min-height:0;width:100%;"></iframe>
+      <div id="md-preview"></div>
+    </div>
+
+    <!-- CONSOLE RESIZER -->
+    <div id="console-resizer"></div>
+
+    <!-- CONSOLE PANEL -->
+    <div id="console-panel">
+      <div id="console-topbar" title="Expandir / Colapsar consola">
+        <span class="console-label">▸ Consola</span>
+        <span id="console-badge"></span>
+        <button id="btn-devtools" title="Modo Chrome DevTools — muestra declaraciones de variables y valores">⬡ DevTools</button>
+        <button id="console-btn-clear" title="Limpiar consola">✕ Limpiar</button>
+        <span class="console-toggle">▾</span>
+      </div>
+      <div id="console-output">
+        <div id="console-empty">
+          <span class="ce-icon">⬡</span>
+          <span>Sin mensajes — usa <code style="color:var(--accent3);font-family:var(--font-code)">console.log()</code> en tu JS</span>
+        </div>
+      </div>
+      <div id="console-repl">
+        <span id="repl-prompt">&gt;</span>
+        <input id="repl-input" type="text" placeholder="Escribe una expresión y presiona Enter..." autocomplete="off" spellcheck="false"/>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+</div><!-- /app-wrapper -->
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <span>🟢 Live</span>
+  <span class="sep">|</span>
+  <span id="sb-lang">HTML</span>
+  <span class="sep">|</span>
+  <span id="sb-pos">Ln 1, Col 1</span>
+  <span class="sep">|</span>
+  <span id="sb-chars">0 chars</span>
+</div>
+
+<!-- TOAST -->
+<div id="toast">✓ <span id="toast-msg">Copiado al portapapeles</span></div>
+
+<!-- MARKED for Markdown -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<!-- Monaco Loader -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+<!-- Shiki via ESM for accurate syntax highlighting -->
+<script type="importmap">
+{
+  "imports": {
+    "shiki": "https://esm.sh/shiki@1.29.2",
+    "@shikijs/monaco": "https://esm.sh/@shikijs/monaco@1.29.2"
+  }
+}
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// SECCIÓN 1 — CONSTANTES GLOBALES (sin dependencias de Monaco)
+// ═══════════════════════════════════════════════════════════════
+
+const DEFAULTS = {
+  html: `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Mi App</title>
+</head>
+<body>
+  <h1>¡Hola, mundo! 👋</h1>
+  <p>Edita HTML, CSS y JS para ver los cambios en tiempo real.</p>
+  <button id="btn">Haz clic aquí</button>
+</body>
+</html>`,
+  css: `/* Estilos globales */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #e2e4f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #7c6af7, #3ecf8e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
+button {
+  margin-top: 20px;
+  padding: 12px 28px;
+  background: #7c6af7;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124, 106, 247, 0.4);
+}`,
+  js: `// JavaScript en tiempo real
+const btn = document.getElementById('btn');
+let count = 0;
+
+btn.addEventListener('click', () => {
+  count++;
+  btn.textContent = \`Clics: \${count} 🎉\`;
+});`,
+  md: `# Bienvenido a g4lcode
+
+Un editor de código en vivo construido con **Monaco Editor**.
+
+## Características
+
+- ✅ HTML, CSS y JavaScript con preview en tiempo real
+- ✅ Markdown con renderizado instantáneo
+- ✅ Monaco Editor (el mismo motor de VS Code)
+- ✅ Redimensiona los paneles arrastrando el divisor
+
+## Atajos
+
+| Atajo | Acción |
+|-------|--------|
+| \`Ctrl+S\` | Formatear código |
+| \`Tab\` | Expandir Emmet |
+| \`Ctrl+Z\` | Deshacer |
+
+> **Tip:** Escribe \`div.clase\` y presiona Tab para expandir con Emmet.
+
+\`\`\`js
+console.log("¡Hola desde g4lcode!");
+\`\`\`
+`
+};
+
+// ── STATE ──────────────────────────────────────────────────────
+const state = { lang: 'html' };
+const models = {};
+let editor = null;
+let debounceTimer = null;
+let devtoolsMode = false;
+
+// ── CONSOLE INTERCEPTOR (se inyecta en el iframe) ─────────────
+const CONSOLE_INTERCEPTOR = `
+<script>
+(function(){
+  const METHODS = ['log','info','warn','error'];
+  const _orig = {};
+  METHODS.forEach(m => {
+    _orig[m] = console[m].bind(console);
+    console[m] = function(...args) {
+      _orig[m](...args);
+      const text = args.map(a => {
+        try { return typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a); }
+        catch(e) { return String(a); }
+      }).join(' ');
+      window.parent.postMessage({ type: 'cf-console', method: m, text, time: Date.now() }, '*');
+    };
+  });
+  window.addEventListener('error', e => {
+    window.parent.postMessage({
+      type: 'cf-console', method: 'error',
+      text: e.message + (e.filename ? ' — ' + e.filename.split('/').pop() + ':' + e.lineno : ''),
+      time: Date.now()
+    }, '*');
+  });
+  window.addEventListener('unhandledrejection', e => {
+    window.parent.postMessage({
+      type: 'cf-console', method: 'error',
+      text: 'Unhandled promise rejection: ' + (e.reason?.message || e.reason || 'unknown'),
+      time: Date.now()
+    }, '*');
+  });
+  // ── REPL: evalúa expresiones enviadas desde el padre ──
+  window.addEventListener('message', e => {
+    if (!e.data || e.data.type !== 'cf-repl') return;
+    try {
+      const result = (0, eval)(e.data.expr);
+      let text;
+      if (result === undefined)           text = 'undefined';
+      else if (result === null)           text = 'null';
+      else if (typeof result === 'object') {
+        try { text = JSON.stringify(result, null, 2); } catch(_) { text = String(result); }
+      } else                              text = String(result);
+      window.parent.postMessage({ type: 'cf-repl-result', ok: true, text, time: Date.now() }, '*');
+    } catch(err) {
+      window.parent.postMessage({ type: 'cf-repl-result', ok: false, text: err.message, time: Date.now() }, '*');
+    }
+  });
+})();
+<\/script>`;
+
+const VERBOSE_INTERCEPTOR = `
+<script>
+(function(){
+  const _tracked = new Set(['undefined','NaN','Infinity','location','document','window','navigator','history','performance','console','JSON','Math','Date','Promise','Array','Object','String','Number','Boolean','Symbol','Error','RegExp','Function','globalThis','self','top','parent','frames','opener','closed','defaultStatus','status','name','length','origin','isSecureContext','crossOriginIsolated','isFinite','isNaN','parseFloat','parseInt','decodeURI','decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape','eval','alert','confirm','prompt','queueMicrotask','requestAnimationFrame','cancelAnimationFrame','setTimeout','clearTimeout','setInterval','clearInterval','requestIdleCallback','cancelIdleCallback','btoa','atob','fetch','XMLHttpRequest','WebSocket','Worker','SharedWorker','Blob','File','FileReader','URL','URLSearchParams','FormData','Headers','Request','Response','Event','CustomEvent','EventTarget','AbortController','AbortSignal','crypto','caches','indexedDB','localStorage','sessionStorage','postMessage','addEventListener','removeEventListener','dispatchEvent','getComputedStyle','matchMedia','screen','devicePixelRatio','innerWidth','innerHeight','outerWidth','outerHeight','scrollX','scrollY','pageXOffset','pageYOffset','screenX','screenY','frameElement','onload','onunload','onerror','onresize','onscroll']);
+  const _handler = {
+    set(target, prop, value) {
+      if (typeof prop === 'string' && !_tracked.has(prop) && !prop.startsWith('__')) {
+        const type = Array.isArray(value) ? 'Array' : typeof value;
+        if (type !== 'function') {
+          const display = type === 'object' && value !== null ? JSON.stringify(value, null, 2) : String(value);
+          window.parent.postMessage({ type: 'cf-console', method: 'verbose', text: prop + ' = ' + display + '  \u2190 ' + type, time: Date.now() }, '*');
+        }
+        _tracked.add(prop);
+      }
+      target[prop] = value;
+      return true;
+    }
+  };
+  window.__devScope = new Proxy({}, _handler);
+})();
+<\/script>`;
+
+// ── SCROLLBAR CSS para el iframe ──────────────────────────────
+function getScrollbarCSS() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'one-dark-pro';
+  const bg    = isDark ? '#21252b' : '#0d0e16';
+  const thumb = isDark ? '#3e4451' : '#252838';
+  const accent= isDark ? '#61afef' : '#a78bfa';
+  return `::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:${bg}}::-webkit-scrollbar-thumb{background:${thumb};border-radius:4px}::-webkit-scrollbar-thumb:hover{background:${accent}}*{scrollbar-width:thin;scrollbar-color:${thumb} ${bg}}`;
+}
+
+// ── PREVIEW RENDER ────────────────────────────────────────────
+function renderPreview() {
+  if (state.lang === 'md') { renderMd(); return; }
+  const html = models.html?.getValue() || '';
+  const css  = models.css?.getValue()  || '';
+  const js   = models.js?.getValue()   || '';
+  const scrollbarBlock = `<style>${getScrollbarCSS()}</style>`;
+  const verboseBlock   = devtoolsMode ? VERBOSE_INTERCEPTOR : '';
+  let injected = html
+    .replace('<head>', `<head>\n${CONSOLE_INTERCEPTOR}${verboseBlock}`)
+    .replace('</head>', `${scrollbarBlock}<style>${css}</style></head>`)
+    .replace('</body>', `<script>${js}<\/script></body>`);
+  if (!html.includes('<head>')) injected = CONSOLE_INTERCEPTOR + verboseBlock + scrollbarBlock + injected;
+  clearConsole(true);
+  document.getElementById('preview-frame').srcdoc = injected;
+  addConsoleLine('system', '▶ Preview actualizado');
+}
+
+function renderMd() {
+  if (typeof marked === 'undefined') return;
+  const raw = models.md?.getValue() || '';
+  document.getElementById('md-preview').innerHTML = `<div class="gh-body">${marked.parse(raw)}</div>`;
+}
+
+// ── LANG SWITCH ───────────────────────────────────────────────
+function switchLang(lang) {
+  if (!editor) return;
+  state.lang = lang;
+  editor.setModel(models[lang]);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  document.querySelectorAll('.etab').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  const isMd = lang === 'md';
+  document.getElementById('preview-frame').style.display = isMd ? 'none' : 'block';
+  document.getElementById('md-preview').style.display    = isMd ? 'block' : 'none';
+  if (isMd) renderMd();
+  updateStatusLang();
+  editor.focus();
+}
+
+function updateStatusLang() {
+  const labels = { html:'HTML', css:'CSS', js:'JavaScript', md:'Markdown' };
+  document.getElementById('sb-lang').textContent = labels[state.lang] || state.lang.toUpperCase();
+}
+
+// ── CONSOLE LOGIC ─────────────────────────────────────────────
+const ICONS = { log:'›', info:'ℹ', warn:'⚠', error:'✖', system:'·', verbose:'≫', 'repl-in':'›', 'repl-out':'←', 'repl-err':'✖' };
+let consoleCount = 0, errorCount = 0;
+
+function addConsoleLine(method, text) {
+  const output = document.getElementById('console-output');
+  const empty  = document.getElementById('console-empty');
+  if (empty) empty.remove();
+  const now  = new Date();
+  const time = now.toLocaleTimeString('es', { hour12:false }) + '.' + String(now.getMilliseconds()).padStart(3,'0');
+  const line = document.createElement('div');
+  line.className = `cline ${method}`;
+  line.innerHTML = `<span class="cline-icon ${method}">${ICONS[method]||'›'}</span><span class="cline-text">${escHtml(text)}</span><span class="cline-time">${time}</span>`;
+  output.appendChild(line);
+  output.scrollTop = output.scrollHeight;
+  if (method !== 'system') {
+    consoleCount++;
+    if (method === 'error') errorCount++;
+    updateBadge();
+  }
+  const panel = document.getElementById('console-panel');
+  if (method === 'error' && panel.classList.contains('collapsed')) panel.classList.remove('collapsed');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function clearConsole(silent) {
+  const output = document.getElementById('console-output');
+  output.innerHTML = '';
+  if (!silent) {
+    const empty = document.createElement('div');
+    empty.id = 'console-empty';
+    empty.innerHTML = `<span class="ce-icon">⬡</span><span>Consola limpia</span>`;
+    output.appendChild(empty);
+  }
+  consoleCount = 0; errorCount = 0;
+  updateBadge();
+}
+
+function updateBadge() {
+  const badge = document.getElementById('console-badge');
+  if (consoleCount === 0) { badge.classList.remove('visible','has-errors'); return; }
+  badge.textContent = consoleCount;
+  badge.classList.add('visible');
+  badge.classList.toggle('has-errors', errorCount > 0);
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+function escHtmlAttr(s) { return s.replace(/"/g,'&quot;'); }
+
+// ═══════════════════════════════════════════════════════════════
+// SECCIÓN 2 — EMMET (puro JS, sin Monaco aún)
+// ═══════════════════════════════════════════════════════════════
+
+const HTML_VOID = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+
+const HTML_BOILERPLATE = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+</html>`;
+
+function expandHtmlAbbr(abbr) {
+  if (abbr === '!') return HTML_BOILERPLATE;
+  function parseNode(str) {
+    let inner = '';
+    str = str.replace(/\{([^}]*)\}/, (_, t) => { inner = t; return ''; });
+    let repeat = 1;
+    str = str.replace(/\*(\d+)$/, (_, n) => { repeat = parseInt(n); return ''; });
+    const attrs = {};
+    str = str.replace(/\[([^\]]*)\]/g, (_, a) => {
+      a.split(/\s+/).forEach(pair => {
+        const [k, v] = pair.split('=');
+        if (k) attrs[k] = v ? v.replace(/^["']|["']$/g, '') : '';
+      });
+      return '';
+    });
+    str = str.replace(/#([\w-]+)/g, (_, id) => { attrs.id = id; return ''; });
+    const classes = [];
+    str = str.replace(/\.([\w-]+)/g, (_, c) => { classes.push(c); return ''; });
+    if (classes.length) attrs.class = classes.join(' ');
+    const tag = str || 'div';
+    return { tag, attrs, inner, repeat };
+  }
+  function buildTag(tag, attrs, inner, childrenHtml) {
+    const attrStr = Object.entries(attrs).map(([k,v]) => v==='' ? ` ${k}` : ` ${k}="${v}"`).join('');
+    const content = inner || childrenHtml || '';
+    if (HTML_VOID.has(tag)) return `<${tag}${attrStr}>`;
+    if (!content) return `<${tag}${attrStr}></${tag}>`;
+    if (content.includes('\n')) {
+      const indented = content.split('\n').map(l => '  '+l).join('\n');
+      return `<${tag}${attrStr}>\n${indented}\n</${tag}>`;
+    }
+    return `<${tag}${attrStr}>${content}</${tag}>`;
+  }
+  function expand(expr) {
+    const siblings = [];
+    let depth = 0, cur = '';
+    for (const ch of expr) {
+      if (ch==='(') depth++;
+      else if (ch===')') depth--;
+      else if (ch==='+' && depth===0) { siblings.push(cur); cur=''; continue; }
+      cur += ch;
+    }
+    siblings.push(cur);
+    return siblings.map(seg => {
+      const gtIdx = seg.indexOf('>');
+      const nodeStr   = gtIdx === -1 ? seg : seg.slice(0, gtIdx);
+      const childExpr = gtIdx === -1 ? '' : seg.slice(gtIdx+1);
+      const { tag, attrs, inner, repeat } = parseNode(nodeStr);
+      const childHtml = childExpr ? expand(childExpr) : '';
+      const single = buildTag(tag, attrs, inner, childHtml);
+      return Array.from({ length: repeat }, (_,i) =>
+        repeat > 1 ? single.replace(/\$\$/g, String(i+1).padStart(2,'0')).replace(/\$/g, String(i+1)) : single
+      ).join('\n');
+    }).join('\n');
+  }
+  try { return expand(abbr); } catch(e) { return null; }
+}
+
+const CSS_SNIPPETS = {
+  'd':'display: ;','df':'display: flex;','dg':'display: grid;','db':'display: block;',
+  'di':'display: inline;','dib':'display: inline-block;','dn':'display: none;',
+  'pos':'position: ;','posa':'position: absolute;','posr':'position: relative;',
+  'posf':'position: fixed;','poss':'position: sticky;',
+  'fxd':'flex-direction: ;','fxwr':'flex-wrap: ;','jc':'justify-content: ;',
+  'ai':'align-items: ;','ac':'align-content: ;','fx':'flex: ;',
+  'fxg':'flex-grow: ;','fxsh':'flex-shrink: ;','fxb':'flex-basis: ;',
+  'gtc':'grid-template-columns: ;','gtr':'grid-template-rows: ;',
+  'gc':'grid-column: ;','gr':'grid-row: ;','gg':'gap: ;',
+  'm':'margin: ;','mt':'margin-top: ;','mr':'margin-right: ;',
+  'mb':'margin-bottom: ;','ml':'margin-left: ;','mx':'margin-inline: ;',
+  'my':'margin-block: ;','ma':'margin: auto;',
+  'p':'padding: ;','pt':'padding-top: ;','pr':'padding-right: ;',
+  'pb':'padding-bottom: ;','pl':'padding-left: ;','px':'padding-inline: ;',
+  'py':'padding-block: ;',
+  'w':'width: ;','h':'height: ;','maw':'max-width: ;','mah':'max-height: ;',
+  'miw':'min-width: ;','mih':'min-height: ;','wf':'width: 100%;','hf':'height: 100%;',
+  'bg':'background: ;','bgc':'background-color: ;','bgi':'background-image: ;',
+  'bgr':'background-repeat: ;','bgs':'background-size: ;','bgp':'background-position: ;',
+  'bd':'border: ;','bdt':'border-top: ;','bdr':'border-right: ;',
+  'bdb':'border-bottom: ;','bdl':'border-left: ;','bdrs':'border-radius: ;',
+  'bdc':'border-color: ;','bdw':'border-width: ;','bds':'border-style: ;','br':'border-radius: ;',
+  'c':'color: ;','f':'font: ;','ff':'font-family: ;','fs':'font-size: ;',
+  'fw':'font-weight: ;','fst':'font-style: ;','lh':'line-height: ;',
+  'ls':'letter-spacing: ;','ta':'text-align: ;','td':'text-decoration: ;',
+  'tt':'text-transform: ;','ws':'white-space: ;','wob':'word-break: ;',
+  'op':'opacity: ;','ov':'overflow: ;','ovx':'overflow-x: ;','ovy':'overflow-y: ;',
+  'cur':'cursor: ;','pe':'pointer-events: ;','us':'user-select: ;',
+  'tr':'transition: ;','tf':'transform: ;','ani':'animation: ;',
+  'zi':'z-index: ;','ct':'content: ;','bxz':'box-sizing: ;',
+  'bxsh':'box-shadow: ;','tsh':'text-shadow: ;','v':'visibility: ;',
+  'fl':'float: ;','cl':'clear: ;',
+};
+
+function expandCssAbbr(abbr) {
+  if (CSS_SNIPPETS[abbr]) return CSS_SNIPPETS[abbr];
+  const match = abbr.match(/^([a-z]+)(-?[\d.]+)(px|em|rem|%|vh|vw|vmin|vmax|s|ms)?$/);
+  if (match) {
+    const [, prefix, num, unit] = match;
+    const prop = CSS_SNIPPETS[prefix];
+    if (prop) {
+      const u = unit || (parseFloat(num) === 0 ? '' : 'px');
+      return prop.replace(/: ;$/, `: ${num}${u};`);
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECCIÓN 3 — EVENT LISTENERS DOM (sin Monaco)
+// ═══════════════════════════════════════════════════════════════
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchLang(btn.dataset.lang));
+});
+document.querySelectorAll('.etab').forEach(btn => {
+  btn.addEventListener('click', () => switchLang(btn.dataset.lang));
+});
+
+// Resizer horizontal
+const resizer     = document.getElementById('resizer');
+const previewPanel= document.getElementById('preview-panel');
+let isResizing = false;
+resizer.addEventListener('mousedown', () => {
+  isResizing = true; resizer.classList.add('dragging');
+  document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none';
+});
+document.addEventListener('mousemove', e => {
+  if (!isResizing) return;
+  const layout = document.getElementById('layout');
+  const rect = layout.getBoundingClientRect();
+  const pct = Math.min(Math.max((rect.right - e.clientX) / rect.width * 100, 15), 70);
+  previewPanel.style.width = pct + '%';
+  if (editor) editor.layout();
+});
+document.addEventListener('mouseup', () => {
+  if (!isResizing) return;
+  isResizing = false; resizer.classList.remove('dragging');
+  document.body.style.cursor = ''; document.body.style.userSelect = '';
+});
+
+// Formato
+async function formatCode() {
+  if (!editor) return;
+  await editor.getAction('editor.action.formatDocument')?.run();
+  showToast('Código formateado');
+}
+document.getElementById('btn-format').addEventListener('click', formatCode);
+
+// Reset
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (!confirm('¿Resetear todo el código a los valores por defecto?')) return;
+  Object.entries(DEFAULTS).forEach(([lang, code]) => models[lang]?.setValue(code));
+  renderPreview();
+  showToast('Código reseteado');
+});
+
+// Share
+document.getElementById('btn-share').addEventListener('click', () => {
+  const data = {};
+  Object.keys(models).forEach(lang => { data[lang] = models[lang].getValue(); });
+  const hash = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  history.pushState(null, '', '#' + hash);
+  navigator.clipboard?.writeText(location.href);
+  showToast('URL copiada al portapapeles');
+});
+
+// Load from hash
+function loadFromHash() {
+  const hash = location.hash.slice(1);
+  if (!hash) return;
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(hash))));
+    Object.entries(data).forEach(([lang, code]) => { if (models[lang]) models[lang].setValue(code); });
+    renderPreview();
+  } catch(e) { /* ignore */ }
+}
+window.addEventListener('load', loadFromHash);
+
+// Console messages desde iframe
+window.addEventListener('message', e => {
+  if (!e.data) return;
+  if (e.data.type === 'cf-console') {
+    if (e.data.method === 'verbose' && !devtoolsMode) return;
+    addConsoleLine(e.data.method, e.data.text);
+  }
+  if (e.data.type === 'cf-repl-result') {
+    if (e.data.ok) addConsoleLine('repl-out', e.data.text);
+    else           addConsoleLine('repl-err', '✖ ' + e.data.text);
+  }
+});
+
+// ── REPL INPUT ────────────────────────────────────────────────
+const replInput   = document.getElementById('repl-input');
+const replHistory = [];
+let replHistIdx   = -1;
+
+replInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const expr = replInput.value.trim();
+    if (!expr) return;
+    // Guardar en historial
+    replHistory.unshift(expr);
+    if (replHistory.length > 50) replHistory.pop();
+    replHistIdx = -1;
+    // Mostrar el input del usuario en la consola
+    addConsoleLine('repl-in', expr);
+    replInput.value = '';
+    // Enviar al iframe para evaluar en su contexto
+    const frame = document.getElementById('preview-frame');
+    frame.contentWindow?.postMessage({ type: 'cf-repl', expr }, '*');
+  }
+  // Historial con flechas
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (replHistIdx < replHistory.length - 1) {
+      replHistIdx++;
+      replInput.value = replHistory[replHistIdx];
+    }
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (replHistIdx > 0) {
+      replHistIdx--;
+      replInput.value = replHistory[replHistIdx];
+    } else {
+      replHistIdx = -1;
+      replInput.value = '';
+    }
+  }
+});
+
+// Click en la consola → foco al input
+document.getElementById('console-output').addEventListener('click', () => {
+  replInput.focus();
+});
+
+// Console clear button
+document.getElementById('console-btn-clear').addEventListener('click', e => {
+  e.stopPropagation(); clearConsole(false);
+});
+
+// Console collapse
+document.getElementById('console-topbar').addEventListener('click', () => {
+  document.getElementById('console-panel').classList.toggle('collapsed');
+});
+
+// Console vertical resizer
+const consoleResizer = document.getElementById('console-resizer');
+const consolePanel   = document.getElementById('console-panel');
+let isCResizing = false, cStartY = 0, cStartH = 0;
+consoleResizer.addEventListener('mousedown', e => {
+  isCResizing = true; cStartY = e.clientY; cStartH = consolePanel.offsetHeight;
+  document.body.style.cursor = 'row-resize'; document.body.style.userSelect = 'none';
+  e.stopPropagation();
+});
+document.addEventListener('mousemove', e => {
+  if (!isCResizing) return;
+  const maxH = document.getElementById('preview-panel').offsetHeight - 32;
+  const newH = Math.min(Math.max(cStartH + (cStartY - e.clientY), 28), maxH);
+  consolePanel.style.height = newH + 'px';
+  if (newH <= 32) consolePanel.classList.add('collapsed');
+  else consolePanel.classList.remove('collapsed');
+  if (editor) editor.layout();
+});
+document.addEventListener('mouseup', () => {
+  if (!isCResizing) return;
+  isCResizing = false; document.body.style.cursor = ''; document.body.style.userSelect = '';
+});
+
+// Toggle preview & consola
+const btnTogglePreview = document.getElementById('btn-toggle-preview');
+const btnToggleConsole = document.getElementById('btn-toggle-console');
+let previewVisible = true, consoleVisible = true;
+
+function syncConsoleLayout() {
+  const panel      = document.getElementById('preview-panel');
+  const resEl      = document.getElementById('resizer');
+  const prevTopbar = document.getElementById('preview-topbar');
+  const prevBody   = document.getElementById('preview-body');
+  const conPanel   = document.getElementById('console-panel');
+  const conResizer = document.getElementById('console-resizer');
+
+  // El panel derecho desaparece solo si AMBOS están ocultos
+  const panelVisible = previewVisible || consoleVisible;
+  panel.classList.toggle('fully-hidden', !panelVisible);
+  resEl.classList.toggle('panel-hidden', !panelVisible);
+
+  // Preview-body y topbar solo visibles si preview activo
+  prevTopbar.style.display = previewVisible ? '' : 'none';
+  prevBody.style.display   = previewVisible ? '' : 'none';
+
+  // Consola
+  conPanel.classList.toggle('force-hidden', !consoleVisible);
+  if (conResizer) conResizer.classList.toggle('hidden', !consoleVisible || !previewVisible);
+
+  // Si preview está oculto pero consola visible → consola ocupa todo el panel
+  conPanel.classList.toggle('console-expand', !previewVisible && consoleVisible);
+
+  if (editor) editor.layout();
+}
+
+btnTogglePreview.addEventListener('click', () => {
+  previewVisible = !previewVisible;
+  btnTogglePreview.classList.toggle('active', previewVisible);
+  btnTogglePreview.classList.toggle('hidden-panel', !previewVisible);
+  btnTogglePreview.querySelector('.tgl-icon').textContent = previewVisible ? '⬜' : '▣';
+  syncConsoleLayout();
+  showToast(previewVisible ? 'Vista previa visible' : 'Vista previa oculta');
+});
+
+btnToggleConsole.addEventListener('click', () => {
+  consoleVisible = !consoleVisible;
+  btnToggleConsole.classList.toggle('active', consoleVisible);
+  btnToggleConsole.classList.toggle('hidden-panel', !consoleVisible);
+  btnToggleConsole.querySelector('.tgl-icon').textContent = consoleVisible ? '▸' : '▪';
+  syncConsoleLayout();
+  showToast(consoleVisible ? 'Consola visible' : 'Consola oculta');
+});
+
+// DevTools mode
+document.getElementById('btn-devtools').addEventListener('click', e => {
+  e.stopPropagation();
+  devtoolsMode = !devtoolsMode;
+  const btn   = document.getElementById('btn-devtools');
+  const panel = document.getElementById('console-panel');
+  btn.classList.toggle('active', devtoolsMode);
+  panel.classList.toggle('devtools-mode', devtoolsMode);
+  btn.textContent = devtoolsMode ? '⬡ DevTools ON' : '⬡ DevTools';
+  renderPreview();
+  showToast(devtoolsMode ? 'DevTools activo — verbose ON' : 'DevTools desactivado');
+});
+
+// Font size
+let currentFontSize = 13.5;
+const FS_MIN = 10, FS_MAX = 24, FS_STEP = 0.5;
+function setFontSize(size) {
+  currentFontSize = Math.min(Math.max(size, FS_MIN), FS_MAX);
+  if (editor) editor.updateOptions({ fontSize: currentFontSize });
+  document.getElementById('fs-value').textContent = Math.round(currentFontSize);
+}
+document.getElementById('fs-up').addEventListener('click', () => { setFontSize(currentFontSize + FS_STEP); showToast(`Fuente: ${Math.round(currentFontSize)}px`); });
+document.getElementById('fs-down').addEventListener('click', () => { setFontSize(currentFontSize - FS_STEP); showToast(`Fuente: ${Math.round(currentFontSize)}px`); });
+
+// Theme switcher
+let shikiReady = false, shikiLoading = false, pendingTheme = null;
+
+const CODEFLOW_SHIKI_THEME = {
+  name: 'codeflow', type: 'dark',
+  colors: {
+    'editor.background':'#0d0e16','editor.foreground':'#e8eaf8',
+    'editorLineNumber.foreground':'#2e3255','editorLineNumber.activeForeground':'#a78bfa',
+    'editor.selectionBackground':'#a78bfa28','editor.lineHighlightBackground':'#13141e',
+    'editorCursor.foreground':'#f472b6','editorIndentGuide.background':'#252838',
+    'editorWidget.background':'#13141e','editorWidget.border':'#252838',
+  },
+  tokenColors: [
+    { scope:['comment','punctuation.definition.comment'], settings:{ foreground:'#5a6390', fontStyle:'italic' } },
+    { scope:['keyword','storage'], settings:{ foreground:'#a78bfa' } },
+    { scope:['keyword.control','keyword.control.flow'], settings:{ foreground:'#f472b6', fontStyle:'bold' } },
+    { scope:['string','string.quoted','string.template'], settings:{ foreground:'#34d399' } },
+    { scope:['constant.numeric'], settings:{ foreground:'#fbbf24' } },
+    { scope:['keyword.operator'], settings:{ foreground:'#67e8f9' } },
+    { scope:['entity.name.type','support.type','storage.type.primitive'], settings:{ foreground:'#38bdf8' } },
+    { scope:['variable','variable.other'], settings:{ foreground:'#c4b5fd' } },
+    { scope:['entity.name.function','support.function'], settings:{ foreground:'#60a5fa', fontStyle:'bold' } },
+    { scope:['entity.name.tag'], settings:{ foreground:'#f472b6' } },
+    { scope:['entity.other.attribute-name'], settings:{ foreground:'#34d399' } },
+    { scope:['string.quoted.double.html'], settings:{ foreground:'#fbbf24' } },
+  ],
+};
+
+async function initShiki(targetTheme) {
+  if (shikiLoading) { pendingTheme = targetTheme; return; }
+  shikiLoading = true;
+  if (!shikiReady) showToast('Cargando tema...');
+  document.documentElement.setAttribute('data-theme', targetTheme);
+  try {
+    const { createHighlighter } = await import('shiki');
+    const { shikiToMonaco }     = await import('@shikijs/monaco');
+    const highlighter = await createHighlighter({
+      themes: ['one-dark-pro', CODEFLOW_SHIKI_THEME],
+      langs: ['html','css','javascript','markdown'],
+    });
+    shikiToMonaco(highlighter, monaco);
+    shikiReady = true;
+    monaco.editor.setTheme(targetTheme);
+    showToast(`Tema: ${targetTheme === 'one-dark-pro' ? 'One Dark Pro' : 'g4lcode'}`);
+  } catch(e) {
+    monaco.editor.setTheme(targetTheme === 'one-dark-pro' ? 'one-dark-pro' : 'codeflow');
+    showToast('Tema aplicado');
+  }
+  shikiLoading = false;
+  if (pendingTheme) { const t = pendingTheme; pendingTheme = null; await applyTheme(t); }
+}
+
+async function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  if (shikiReady) {
+    monaco.editor.setTheme(theme);
+    showToast(`Tema: ${theme === 'one-dark-pro' ? 'One Dark Pro' : 'g4lcode'}`);
+  } else {
+    await initShiki(theme);
+  }
+  renderPreview();
+}
+
+document.getElementById('theme-select').addEventListener('change', async function() {
+  await applyTheme(this.value);
+});
+
+// ═══════════════════════════════════════════════════════════════
+// SECCIÓN 4 — MONACO INIT (todo lo que necesita monaco va aquí)
+// ═══════════════════════════════════════════════════════════════
+
+window.MonacoEnvironment = {
+  getWorkerUrl(moduleId, label) {
+    const base = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs';
+    const src = label === 'html' || label === 'handlebars'
+      ? `${base}/language/html/htmlWorker.js`
+      : label === 'css' || label === 'scss' || label === 'less'
+      ? `${base}/language/css/cssWorker.js`
+      : label === 'javascript' || label === 'typescript'
+      ? `${base}/language/typescript/tsWorker.js`
+      : `${base}/editor/editor.worker.js`;
+    return `data:text/javascript;charset=utf-8,${encodeURIComponent(
+      `self.MonacoEnvironment={baseUrl:'${base}/'};importScripts('${src}');`
+    )}`;
+  }
+};
+
+require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+require(['vs/editor/editor.main'], () => {
+
+  // ── Temas ──────────────────────────────────────────────────
+  monaco.editor.defineTheme('codeflow', {
+    base: 'vs-dark', inherit: true,
+    rules: [
+      { token:'comment',           foreground:'5a6390', fontStyle:'italic' },
+      { token:'keyword',           foreground:'a78bfa' },
+      { token:'keyword.control',   foreground:'f472b6', fontStyle:'bold' },
+      { token:'storage',           foreground:'a78bfa' },
+      { token:'string',            foreground:'34d399' },
+      { token:'number',            foreground:'fbbf24' },
+      { token:'operator',          foreground:'67e8f9' },
+      { token:'type',              foreground:'38bdf8' },
+      { token:'variable',          foreground:'e8eaf8' },
+      { token:'variable.other',    foreground:'c4b5fd' },
+      { token:'function',          foreground:'60a5fa', fontStyle:'bold' },
+      { token:'tag',               foreground:'f472b6' },
+      { token:'attribute.name',    foreground:'34d399' },
+      { token:'attribute.value',   foreground:'fbbf24' },
+      { token:'delimiter',         foreground:'6572a0' },
+      { token:'delimiter.html',    foreground:'818cf8' },
+      { token:'metatag',           foreground:'a78bfa' },
+    ],
+    colors: {
+      'editor.background':'#0d0e16','editor.foreground':'#e8eaf8',
+      'editorLineNumber.foreground':'#2e3255','editorLineNumber.activeForeground':'#a78bfa',
+      'editor.selectionBackground':'#a78bfa28','editor.lineHighlightBackground':'#13141e',
+      'editorCursor.foreground':'#f472b6','editorIndentGuide.background':'#252838',
+      'editorWidget.background':'#13141e','editorWidget.border':'#252838',
+      'editor.selectionHighlightBackground':'#a78bfa18',
+      'editorBracketMatch.background':'#a78bfa33','editorBracketMatch.border':'#a78bfa',
+    }
+  });
+
+  monaco.editor.defineTheme('one-dark-pro', {
+    base: 'vs-dark', inherit: true,
+    rules: [
+      { token:'comment',         foreground:'5c6370', fontStyle:'italic' },
+      { token:'keyword',         foreground:'c678dd' },
+      { token:'keyword.control', foreground:'c678dd' },
+      { token:'storage',         foreground:'c678dd' },
+      { token:'string',          foreground:'98c379' },
+      { token:'number',          foreground:'d19a66' },
+      { token:'operator',        foreground:'56b6c2' },
+      { token:'type',            foreground:'e5c07b' },
+      { token:'variable',        foreground:'e06c75' },
+      { token:'function',        foreground:'61afef' },
+      { token:'tag',             foreground:'e06c75' },
+      { token:'attribute.name',  foreground:'d19a66' },
+      { token:'attribute.value', foreground:'98c379' },
+    ],
+    colors: {
+      'editor.background':'#21252b','editor.foreground':'#abb2bf',
+      'editorLineNumber.foreground':'#495162','editorLineNumber.activeForeground':'#abb2bf',
+      'editor.selectionBackground':'#3e4451','editor.lineHighlightBackground':'#2c313c',
+      'editorCursor.foreground':'#528bff','editorWidget.background':'#1b1f27',
+      'editorWidget.border':'#181a1f',
+    }
+  });
+
+  // ── Modelos ────────────────────────────────────────────────
+  const langMap = { html:'html', css:'css', js:'javascript', md:'markdown' };
+  Object.entries(DEFAULTS).forEach(([lang, code]) => {
+    models[lang] = monaco.editor.createModel(code, langMap[lang]);
+  });
+
+  // ── Editor ────────────────────────────────────────────────
+  editor = monaco.editor.create(document.getElementById('monaco-container'), {
+    model: models.html,
+    theme: 'codeflow',
+    fontSize: 13.5,
+    fontFamily: "'JetBrains Mono', monospace",
+    fontLigatures: true,
+    lineNumbers: 'on',
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+    wordWrap: 'on',
+    automaticLayout: true,
+    padding: { top: 16, bottom: 16 },
+    smoothScrolling: true,
+    cursorBlinking: 'phase',
+    cursorSmoothCaretAnimation: 'on',
+    renderWhitespace: 'none',
+    bracketPairColorization: { enabled: true },
+    formatOnType: false,
+    tabSize: 2,
+    quickSuggestions: { other: true, comments: false, strings: true },
+    suggestOnTriggerCharacters: true,
+    acceptSuggestionOnEnter: 'on',
+    tabCompletion: 'on',
+    suggest: { insertMode: 'replace', showKeywords: true, showSnippets: true },
+    parameterHints: { enabled: true },
+    wordBasedSuggestions: 'off',
+  });
+
+  editor.onDidChangeCursorPosition(e => {
+    document.getElementById('sb-pos').textContent = `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
+  });
+  editor.onDidChangeModelContent(() => {
+    const val = editor.getValue();
+    document.getElementById('sb-chars').textContent = `${val.length} chars`;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(renderPreview, 300);
+  });
+  editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, formatCode);
+
+  // ── Emmet Tab ─────────────────────────────────────────────
+  editor.onKeyDown(e => {
+    if (e.keyCode !== monaco.KeyCode.Tab) return;
+    if (e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+    const model = editor.getModel();
+    const pos   = editor.getPosition();
+    const lang  = model.getLanguageId();
+    if (!['html','css','scss','less','markdown'].includes(lang)) return;
+    const textBefore = model.getLineContent(pos.lineNumber).substring(0, pos.column - 1);
+    const abbrMatch  = textBefore.match(/[\w.#>\[\]*+{}$@!:-]+$/);
+    if (!abbrMatch) return;
+    const abbr = abbrMatch[0];
+    const expanded = lang === 'html' || lang === 'markdown'
+      ? expandHtmlAbbr(abbr)
+      : expandCssAbbr(abbr);
+    if (!expanded) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const startCol = pos.column - abbr.length;
+    editor.executeEdits('emmet', [{
+      range: new monaco.Range(pos.lineNumber, startCol, pos.lineNumber, pos.column),
+      text: expanded,
+    }]);
+    requestAnimationFrame(() => {
+      if (lang === 'css' || lang === 'scss' || lang === 'less') {
+        const colonIdx = expanded.indexOf(': ');
+        if (colonIdx !== -1) editor.setPosition({ lineNumber: pos.lineNumber, column: startCol + colonIdx + 2 });
+      } else {
+        const firstClose = expanded.indexOf('>');
+        const baseTag = abbr.replace(/[.#\[{>*+].*/,'');
+        if (firstClose !== -1 && !HTML_VOID.has(baseTag)) {
+          editor.setPosition({ lineNumber: pos.lineNumber, column: startCol + firstClose + 1 });
+        }
+      }
+      editor.focus();
+    });
+  });
+
+  // ── Emmet Completion Providers ────────────────────────────
+  const HTML_TAGS = ['a','abbr','address','article','aside','audio','b','blockquote',
+    'button','canvas','code','col','datalist','dd','details','dialog','div','dl','dt',
+    'em','embed','fieldset','figcaption','figure','footer','form','h1','h2','h3','h4',
+    'h5','h6','header','hr','i','iframe','img','input','label','legend','li','link',
+    'main','map','mark','menu','meta','meter','nav','ol','optgroup','option','output',
+    'p','picture','pre','progress','section','select','small','source','span','strong',
+    'style','sub','summary','sup','table','tbody','td','template','textarea','tfoot',
+    'th','thead','time','title','tr','ul','video'];
+
+  const HTML_FIXED = [
+    { label:'html:5',    detail:'Documento HTML5 completo', insert:'<!DOCTYPE html>\n<html lang="es">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Document</title>\n</head>\n<body>\n  \n</body>\n</html>' },
+    { label:'ul>li',     detail:'<ul><li></li></ul>',       insert:'<ul>\n  <li></li>\n</ul>' },
+    { label:'ol>li',     detail:'<ol><li></li></ol>',       insert:'<ol>\n  <li></li>\n</ol>' },
+    { label:'table',     detail:'Tabla con thead/tbody',    insert:'<table>\n  <thead>\n    <tr>\n      <th></th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td></td>\n    </tr>\n  </tbody>\n</table>' },
+    { label:'form',      detail:'<form action method>',     insert:'<form action="" method="post">\n  \n</form>' },
+    { label:'select',    detail:'<select><option>',         insert:'<select>\n  <option value=""></option>\n</select>' },
+    { label:'link:css',  detail:'<link rel="stylesheet">',  insert:'<link rel="stylesheet" href="style.css">' },
+    { label:'script:src',detail:'<script src="">',          insert:'<script src=""><\/script>' },
+    { label:'meta:vp',   detail:'meta viewport',            insert:'<meta name="viewport" content="width=device-width, initial-scale=1.0">' },
+    { label:'inp',       detail:'<input type="text">',      insert:'<input type="text" name="" id="">' },
+    { label:'btn',       detail:'<button type="button">',   insert:'<button type="button"></button>' },
+    { label:'img',       detail:'<img src="" alt="">',      insert:'<img src="" alt="">' },
+    { label:'a',         detail:'<a href="">',              insert:'<a href=""></a>' },
+    { label:'video',     detail:'<video controls>',         insert:'<video controls>\n  <source src="" type="video/mp4">\n</video>' },
+  ];
+
+  monaco.languages.registerCompletionItemProvider('html', {
+    triggerCharacters: ['.','#','>','*','[','!'],
+    provideCompletionItems(model, position) {
+      const line       = model.getLineContent(position.lineNumber);
+      const textBefore = line.substring(0, position.column - 1);
+      const abbrMatch  = textBefore.match(/[\w.#>\[\]*+!:-]+$/);
+      const abbr       = abbrMatch ? abbrMatch[0] : '';
+      const wordMatch  = textBefore.match(/\w+$/);
+      const word       = wordMatch ? wordMatch[0] : '';
+
+      const mkRange = (len) => ({
+        startLineNumber: position.lineNumber, endLineNumber: position.lineNumber,
+        startColumn: position.column - len, endColumn: position.column,
+      });
+
+      const suggestions = [];
+
+      // ! → boilerplate HTML5
+      if (abbr === '!') {
+        suggestions.push({
+          label: '!',
+          kind: monaco.languages.CompletionItemKind.Snippet,
+          detail: 'Estructura HTML5 completa',
+          documentation: { value: `**Emmet**\n\`\`\`html\n${HTML_BOILERPLATE}\n\`\`\`` },
+          insertText: HTML_BOILERPLATE,
+          range: mkRange(1),
+          sortText: '00',
+        });
+        return { suggestions };
+      }
+
+      // Snippets fijos
+      HTML_FIXED.forEach(s => {
+        if (!word || s.label.startsWith(word) || s.label.includes(word)) {
+          suggestions.push({
+            label: s.label,
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            detail: s.detail,
+            documentation: { value: `**Emmet**\n\`\`\`html\n${s.insert}\n\`\`\`` },
+            insertText: s.insert,
+            range: mkRange(abbr.length),
+            sortText: '0' + s.label,
+          });
+        }
+      });
+
+      // Etiquetas simples
+      if (word) {
+        HTML_TAGS.forEach(tag => {
+          if (tag.startsWith(word) && !HTML_FIXED.find(s => s.label === tag)) {
+            const exp = expandHtmlAbbr(tag) || `<${tag}></${tag}>`;
+            suggestions.push({
+              label: tag,
+              kind: monaco.languages.CompletionItemKind.Snippet,
+              detail: exp,
+              documentation: { value: `**Emmet**\n\`\`\`html\n${exp}\n\`\`\`` },
+              insertText: exp,
+              range: mkRange(word.length),
+              sortText: '1' + tag,
+            });
+          }
+        });
+      }
+
+      // Abreviatura compleja con operadores
+      if (abbr && /[.#>*\[\]]/.test(abbr)) {
+        const expanded = expandHtmlAbbr(abbr);
+        if (expanded) {
+          suggestions.unshift({
+            label: abbr + ' ⚡',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            detail: 'Expandir con Emmet',
+            documentation: { value: `**Emmet**\n\`\`\`html\n${expanded}\n\`\`\`` },
+            insertText: expanded,
+            range: mkRange(abbr.length),
+            sortText: '00',
+          });
+        }
+      }
+
+      return { suggestions };
+    }
+  });
+
+  const CSS_SNIPPETS_LIST = Object.entries(CSS_SNIPPETS).map(([abbr, val]) => ({ abbr, val }));
+  const CSS_NUM_PREFIXES  = new Set(['m','mt','mr','mb','ml','mx','my','p','pt','pr','pb','pl','px','py','w','h','fs','lh','br','op','zi','gg','bdrs']);
+
+  monaco.languages.registerCompletionItemProvider('css', {
+    triggerCharacters: [':','-'],
+    provideCompletionItems(model, position) {
+      const line       = model.getLineContent(position.lineNumber);
+      const textBefore = line.substring(0, position.column - 1);
+      const abbrMatch  = textBefore.match(/[\w-]+$/);
+      const abbr       = abbrMatch ? abbrMatch[0] : '';
+
+      const range = {
+        startLineNumber: position.lineNumber, endLineNumber: position.lineNumber,
+        startColumn: position.column - abbr.length, endColumn: position.column,
+      };
+
+      const suggestions = [];
+      CSS_SNIPPETS_LIST.forEach(({ abbr: a, val }) => {
+        if (!abbr || a.startsWith(abbr)) {
+          suggestions.push({
+            label: a,
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            detail: val,
+            documentation: { value: `**Emmet CSS**\n\`\`\`css\n${val}\n\`\`\`` },
+            insertText: val,
+            range,
+            sortText: '0' + a,
+          });
+        }
+      });
+
+      // Variantes con número
+      if (abbr && CSS_NUM_PREFIXES.has(abbr)) {
+        [2,4,8,10,12,16,20,24,32,48,64,100].forEach(n => {
+          const key = abbr + n;
+          const exp = expandCssAbbr(key);
+          if (exp) {
+            suggestions.push({
+              label: key,
+              kind: monaco.languages.CompletionItemKind.Snippet,
+              detail: exp,
+              documentation: { value: `**Emmet CSS**\n\`\`\`css\n${exp}\n\`\`\`` },
+              insertText: exp,
+              range,
+              sortText: '1' + n.toString().padStart(4,'0'),
+            });
+          }
+        });
+      }
+
+      return { suggestions };
+    }
+  });
+
+  // ── Initial render ────────────────────────────────────────
+  renderPreview();
+  updateStatusLang();
+});
+</script>
+</body>
+</html>
