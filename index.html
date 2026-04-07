@@ -300,6 +300,33 @@
     #md-preview blockquote > :first-child { margin-top: 0; }
     #md-preview blockquote > :last-child  { margin-bottom: 0; }
 
+    /* ── GitHub Alerts ── */
+    .gh-alert {
+      padding: 12px 16px; margin: 0 0 16px;
+      border-radius: 6px; border-left: 4px solid;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .gh-alert-title {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 600; font-size: 0.875em; letter-spacing: 0.02em;
+    }
+    .gh-alert p { margin: 0; font-size: 0.9em; line-height: 1.6; }
+    .gh-alert p:last-child { margin-bottom: 0; }
+
+    .gh-alert.note    { background: rgba(31,111,235,.1);  border-color: #1f6feb; }
+    .gh-alert.tip     { background: rgba(35,134,54,.1);   border-color: #238636; }
+    .gh-alert.warning { background: rgba(154,103,0,.1);   border-color: #9a6700; }
+    .gh-alert.important { background: rgba(130,80,223,.1);border-color: #8250df; }
+    .gh-alert.caution { background: rgba(218,54,51,.1);   border-color: #da3633; }
+
+    .gh-alert.note     .gh-alert-title { color: #58a6ff; }
+    .gh-alert.tip      .gh-alert-title { color: #3fb950; }
+    .gh-alert.warning  .gh-alert-title { color: #d29922; }
+    .gh-alert.important .gh-alert-title { color: #a371f7; }
+    .gh-alert.caution  .gh-alert-title { color: #f85149; }
+
+    .gh-alert .gh-alert-body { color: #e6edf3; }
+
     /* code inline */
     #md-preview code {
       padding: .2em .4em; margin: 0;
@@ -788,7 +815,22 @@ Un editor de código en vivo construido con **Monaco Editor**.
 | \`Tab\` | Expandir Emmet |
 | \`Ctrl+Z\` | Deshacer |
 
-> **Tip:** Escribe \`div.clase\` y presiona Tab para expandir con Emmet.
+## Alertas estilo GitHub
+
+>[!NOTE]
+>Información útil que el lector debe tener en cuenta, incluso al hojear el contenido.
+
+>[!TIP]
+>Información opcional para ayudar al usuario a tener más éxito.
+
+>[!WARNING]
+>Información crítica necesaria para el éxito del usuario. Puede causar problemas si se ignora.
+
+>[!IMPORTANT]
+>Información clave que los usuarios necesitan saber para alcanzar su objetivo.
+
+>[!CAUTION]
+>Consecuencias negativas de ciertas acciones. Úsalo con cuidado.
 
 \`\`\`js
 console.log("¡Hola desde g4lcode!");
@@ -905,7 +947,33 @@ function renderPreview() {
 function renderMd() {
   if (typeof marked === 'undefined') return;
   const raw = models.md?.getValue() || '';
-  document.getElementById('md-preview').innerHTML = `<div class="gh-body">${marked.parse(raw)}</div>`;
+  const html = marked.parse(raw);
+  document.getElementById('md-preview').innerHTML = `<div class="gh-body">${processAlerts(html)}</div>`;
+}
+
+// Convierte blockquotes con [!TYPE] en GitHub Alerts estilizados
+function processAlerts(html) {
+  const ALERTS = {
+    'NOTE':      { icon: 'ℹ️', label: 'Note' },
+    'TIP':       { icon: '💡', label: 'Tip' },
+    'WARNING':   { icon: '⚠️', label: 'Warning' },
+    'IMPORTANT': { icon: '❗', label: 'Important' },
+    'CAUTION':   { icon: '🛑', label: 'Caution' },
+  };
+  // Marked convierte > [!NOTE] en <blockquote><p>[!NOTE]</p>...</blockquote>
+  return html.replace(
+    /<blockquote>\s*<p>\[!(NOTE|TIP|WARNING|IMPORTANT|CAUTION)\]([\s\S]*?)<\/blockquote>/gi,
+    (_, type, rest) => {
+      const t = type.toUpperCase();
+      const { icon, label } = ALERTS[t] || { icon: 'ℹ️', label: type };
+      // Limpia el texto restante (quita el primer </p> sobrante del tipo)
+      const body = rest.replace(/^\s*<\/p>/, '').trim();
+      return `<div class="gh-alert ${t.toLowerCase()}">
+        <div class="gh-alert-title">${icon} ${label}</div>
+        <div class="gh-alert-body">${body || ''}</div>
+      </div>`;
+    }
+  );
 }
 
 // ── LANG SWITCH ───────────────────────────────────────────────
