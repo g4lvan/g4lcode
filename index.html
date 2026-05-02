@@ -1373,91 +1373,32 @@ window.addEventListener('message', e => {
   if (e.data.type === 'cf-console') {
     if (e.data.method === 'verbose' && !devtoolsMode) return;
     addConsoleLine(e.data.method, e.data.text);
+  } else if (e.data.type === 'cf-repl-result') {
+    if (!e.data.silent) {
+      if (e.data.ok) {
+        addConsoleLine('repl-out', e.data.text);
+      } else {
+        addConsoleLine('repl-err', '✖ ' + e.data.text);
+      }
+    }
   }
-  // REPL now evaluates in parent — no iframe message needed
 });
 
 // ── REPL INPUT ──────────────────────────────────────────────────────────────
-// El scope vive en el PADRE — no hay doble-escape de strings ni problemas de template literals
+// El REPL evalúa en el iframe para tener acceso al scope del usuario
 const replInput   = document.getElementById('repl-input');
 const replHistory = [];
 let replHistIdx   = -1;
 
-// Scope persistente del REPL
-const REPL_SCOPE = Object.create(null);
-
 function replEval(expr) {
   expr = expr.trim();
   if (!expr) return;
-
-  const isLetConst = /^(let|const)\s+[\w$]/.test(expr);
-  const isFnDecl   = /^function\s+\w/.test(expr);
-  const isClassDecl= /^class\s+\w/.test(expr);
-  const isVar      = /^var\s+[\w$]/.test(expr);
-
-  const scopeKeys = Object.keys(REPL_SCOPE);
-  const scopeVals = scopeKeys.map(k => REPL_SCOPE[k]);
-
-  // Helper: evalúa una expresión con acceso al scope acumulado
-  function evalWithScope(code) {
-    if (!scopeKeys.length) return eval(code);
-    return new Function(...scopeKeys, '"use strict"; return (' + code + ')')(...scopeVals);
+  const frame = document.getElementById('preview-frame');
+  if (!frame || !frame.contentWindow) {
+    addConsoleLine('repl-err', '✖ Preview no disponible — ejecuta el código primero');
+    return;
   }
-
-  try {
-    let result, displayResult;
-
-    if (isLetConst) {
-      // Parsear: "let name = expr" o "let name"
-      const m = expr.match(/^(?:let|const)\s+([\w$]+)(?:\s*=\s*([\s\S]*))?;?$/);
-      if (!m) throw new SyntaxError('Declaración inválida');
-      const varName = m[1];
-      const valSrc  = m[2] ? m[2].replace(/;+$/, '') : 'undefined';
-      result = evalWithScope(valSrc);
-      REPL_SCOPE[varName] = result;
-      displayResult = result;
-
-    } else if (isFnDecl || isClassDecl) {
-      // function foo(){} / class Foo{} — eval directo, guardar en scope
-      result = eval(expr);
-      const m = expr.match(/^(?:function|class)\s+([\w$]+)/);
-      if (m) REPL_SCOPE[m[1]] = result || eval(m[1]);
-      displayResult = undefined;
-
-    } else if (isVar) {
-      // var — eval con scope (para que acceda a let/const previos), guarda en scope
-      const m = expr.match(/^var\s+([\w$]+)(?:\s*=\s*([\s\S]*))?;?$/);
-      if (m) {
-        const varName = m[1];
-        const valSrc  = m[2] ? m[2].replace(/;+$/, '') : 'undefined';
-        result = evalWithScope(valSrc);
-        REPL_SCOPE[varName] = result;
-        displayResult = result;
-      } else {
-        displayResult = evalWithScope(expr);
-      }
-
-    } else {
-      // Expresión normal — evalúa con scope
-      displayResult = evalWithScope(expr);
-    }
-
-    // Formatear resultado
-    let text;
-    if (displayResult === undefined)             text = 'undefined';
-    else if (displayResult === null)             text = 'null';
-    else if (typeof displayResult === 'function') text = '[Function: ' + (displayResult.name || 'anonymous') + ']';
-    else if (typeof displayResult === 'object') {
-      try { text = JSON.stringify(displayResult, null, 2); }
-      catch { text = String(displayResult); }
-    } else {
-      text = String(displayResult);
-    }
-    addConsoleLine('repl-out', text);
-
-  } catch(err) {
-    addConsoleLine('repl-err', '✖ ' + err.message);
-  }
+  frame.contentWindow.postMessage({ type: 'cf-repl', expr }, '*');
 }
 
 replInput.addEventListener('keydown', e => {
