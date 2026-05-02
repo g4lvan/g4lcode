@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="codeflow">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -31,42 +31,36 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg:          #0d0e16;
-      --surface:     #13141e;
-      --border:      #252838;
-      --accent:      #a78bfa;
-      --accent2:     #34d399;
-      --accent3:     #fbbf24;
-      --accent4:     #f472b6;
-      --accent-dim:  rgba(167,139,250,.09);
-      --accent-mid:  rgba(167,139,250,.17);
-      --accent-soft: rgba(167,139,250,.22);
-      --text:        #e8eaf8;
-      --muted:       #6572a0;
-      --console-bg:  #090a12;
-      --tab-h:       42px;
-      --bar-h:       52px;
-      --font-ui:     'Syne', sans-serif;
-      --font-code:   'JetBrains Mono', monospace;
+        :root {
+      --bg:#0d0e16; --surface:#13141e; --border:#252838;
+      --accent:#a78bfa; --accent2:#34d399; --accent3:#fbbf24; --accent4:#f472b6;
+      --accent-dim:rgba(167,139,250,.09); --accent-mid:rgba(167,139,250,.17); --accent-soft:rgba(167,139,250,.22);
+      --text:#e8eaf8; --muted:#6572a0; --console-bg:#090a12;
+      --statusbar-bg:#a78bfa; --statusbar-fg:#fff;
+      --tab-h:42px; --bar-h:52px;
+      --font-ui:'Syne',sans-serif; --font-code:'JetBrains Mono',monospace;
     }
-
-    /* ── ONE DARK PRO theme overrides ── */
+    :root[data-theme="codeflow"] {
+      --bg:#0d0e16; --surface:#13141e; --border:#252838;
+      --accent:#a78bfa; --accent2:#34d399; --accent3:#fbbf24; --accent4:#f472b6;
+      --accent-dim:rgba(167,139,250,.09); --accent-mid:rgba(167,139,250,.17); --accent-soft:rgba(167,139,250,.22);
+      --text:#e8eaf8; --muted:#6572a0; --console-bg:#090a12;
+      --statusbar-bg:#a78bfa; --statusbar-fg:#fff;
+    }
     :root[data-theme="one-dark-pro"] {
-      --bg:          #21252b;
-      --surface:     #282c34;
-      --border:      #3e4451;
-      --accent:      #61afef;
-      --accent2:     #98c379;
-      --accent3:     #e5c07b;
-      --accent4:     #c678dd;
-      --accent-dim:  rgba(97,175,239,.08);
-      --accent-mid:  rgba(97,175,239,.15);
-      --accent-soft: rgba(97,175,239,.18);
-      --text:        #abb2bf;
-      --muted:       #5c6370;
-      --console-bg:  #1a1d23;
+      --bg: #21252b; --surface: #282c34; --border: #3e4451;
+      --accent: #61afef; --accent2: #98c379; --accent3: #e5c07b; --accent4: #c678dd;
+      --accent-dim: rgba(97,175,239,.08); --accent-mid: rgba(97,175,239,.15); --accent-soft: rgba(97,175,239,.2);
+      --text: #abb2bf; --muted: #5c6370; --console-bg: #1a1d23;
+      --statusbar-bg: #21252b; --statusbar-fg: #61afef;
     }
+    :root[data-theme="dracula"]       { --bg:#1e1f29;--surface:#282a36;--border:#44475a;--accent:#bd93f9;--accent2:#50fa7b;--accent3:#f1fa8c;--accent4:#ff79c6;--accent-dim:rgba(189,147,249,.09);--accent-mid:rgba(189,147,249,.18);--accent-soft:rgba(189,147,249,.24);--text:#f8f8f2;--muted:#6272a4;--console-bg:#181920;--statusbar-bg:#bd93f9;--statusbar-fg:#282a36; }
+    :root[data-theme="night-owl"]     { --bg:#011627;--surface:#021d2f;--border:#1d3b53;--accent:#82aaff;--accent2:#addb67;--accent3:#ffcb8b;--accent4:#c792ea;--accent-dim:rgba(130,170,255,.08);--accent-mid:rgba(130,170,255,.16);--accent-soft:rgba(130,170,255,.22);--text:#d6deeb;--muted:#5f7e97;--console-bg:#010e1a;--statusbar-bg:#082d47;--statusbar-fg:#82aaff; }
+    :root[data-theme="solarized-dark"]{ --bg:#002b36;--surface:#073642;--border:#194551;--accent:#268bd2;--accent2:#859900;--accent3:#b58900;--accent4:#d33682;--accent-dim:rgba(38,139,210,.09);--accent-mid:rgba(38,139,210,.18);--accent-soft:rgba(38,139,210,.24);--text:#839496;--muted:#4a6872;--console-bg:#001e27;--statusbar-bg:#073642;--statusbar-fg:#268bd2; }
+    :root[data-theme="github-dark"]   { --bg:#0d1117;--surface:#161b22;--border:#30363d;--accent:#58a6ff;--accent2:#3fb950;--accent3:#d29922;--accent4:#f47067;--accent-dim:rgba(88,166,255,.08);--accent-mid:rgba(88,166,255,.15);--accent-soft:rgba(88,166,255,.22);--text:#e6edf3;--muted:#484f58;--console-bg:#090d12;--statusbar-bg:#161b22;--statusbar-fg:#58a6ff; }
+    :root[data-theme="monokai-pro"]   { --bg:#2d2a2e;--surface:#343135;--border:#4a464d;--accent:#ab9df2;--accent2:#a9dc76;--accent3:#ffd866;--accent4:#ff6188;--accent-dim:rgba(171,157,242,.09);--accent-mid:rgba(171,157,242,.17);--accent-soft:rgba(171,157,242,.24);--text:#fcfcfa;--muted:#727072;--console-bg:#221f22;--statusbar-bg:#ff6188;--statusbar-fg:#2d2a2e; }
+    :root[data-theme="tokyo-night"]   { --bg:#1a1b26;--surface:#1f2335;--border:#292e42;--accent:#7aa2f7;--accent2:#9ece6a;--accent3:#e0af68;--accent4:#f7768e;--accent-dim:rgba(122,162,247,.08);--accent-mid:rgba(122,162,247,.16);--accent-soft:rgba(122,162,247,.22);--text:#c0caf5;--muted:#565f89;--console-bg:#13141f;--statusbar-bg:#7aa2f7;--statusbar-fg:#1a1b26; }
+    :root[data-theme="catppuccin"]    { --bg:#1e1e2e;--surface:#181825;--border:#313244;--accent:#cba6f7;--accent2:#a6e3a1;--accent3:#f9e2af;--accent4:#f38ba8;--accent-dim:rgba(203,166,247,.08);--accent-mid:rgba(203,166,247,.16);--accent-soft:rgba(203,166,247,.22);--text:#cdd6f4;--muted:#6c7086;--console-bg:#11111b;--statusbar-bg:#cba6f7;--statusbar-fg:#1e1e2e; }
 
     html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
 
@@ -119,6 +113,40 @@
       flex: 1;
       min-height: 0;
     }
+
+    /* ── PROJECTS SIDEBAR ── */
+    #projects-sidebar {
+      width: 210px; background: var(--bg); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
+      transition: background .25s, border-color .25s;
+    }
+    #projects-sidebar.collapsed { width: 0 !important; min-width: 0 !important; }
+    #proj-resizer {
+      width: 4px; background: transparent; cursor: col-resize; flex-shrink: 0;
+      transition: background .15s; position: relative;
+    }
+    #proj-resizer:hover, #proj-resizer.dragging { background: var(--accent); }
+    #proj-header {
+      height: var(--tab-h); background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 12px; gap: 8px; flex-shrink: 0;
+    }
+    #proj-header span { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--muted); flex: 1; white-space: nowrap; }
+    #btn-new-proj { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.1rem; padding: 2px 5px; border-radius: 4px; transition: color .15s, background .15s; }
+    #btn-new-proj:hover { color: var(--accent); background: var(--accent-dim); }
+    #projects-list { flex: 1; overflow-y: auto; padding: 6px; }
+    #projects-list::-webkit-scrollbar { width: 4px; }
+    #projects-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .proj-item { display: flex; align-items: center; gap: 7px; padding: 7px 8px; border-radius: 6px; cursor: pointer; color: var(--muted); font-size: 0.77rem; font-weight: 600; transition: all .15s; user-select: none; }
+    .proj-item:hover { background: var(--border); color: var(--text); }
+    .proj-item.active { background: var(--accent-soft); color: var(--accent); }
+    .proj-item .proj-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .proj-item .proj-del { opacity: 0; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 0.7rem; padding: 1px 4px; border-radius: 3px; transition: opacity .15s, color .15s; flex-shrink: 0; }
+    .proj-item:hover .proj-del { opacity: 1; }
+    .proj-item .proj-del:hover { color: #f47067; }
+    #proj-rename-input { flex: 1; background: var(--bg); border: 1px solid var(--accent); color: var(--text); font-family: var(--font-ui); font-size: 0.77rem; font-weight: 600; border-radius: 4px; padding: 1px 5px; outline: none; min-width: 0; }
+    #btn-sidebar-toggle { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600; padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: all .18s; display: flex; align-items: center; gap: 5px; }
+    #btn-sidebar-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    #btn-sidebar-toggle.active { background: var(--accent-mid); border-color: var(--accent); color: var(--accent); }
 
     /* ── SIDEBAR (language tabs, vertical) ── */
     #sidebar {
@@ -459,7 +487,7 @@
       height: 4px; cursor: row-resize; background: transparent; flex-shrink: 0;
       width: 100%; transition: background .15s;
     }
-    #console-resizer:hover { background: var(--accent); }
+    #console-resizer:hover, #console-resizer.dragging { background: var(--accent); }
     #console-resizer.hidden { display: none; }
 
     #console-output {
@@ -529,9 +557,9 @@
 
     /* ── STATUS BAR ── */
     #statusbar {
-      height: 24px; background: var(--accent); display: flex; align-items: center;
+      height: 24px; background: var(--statusbar-bg); display: flex; align-items: center;
       padding: 0 16px; gap: 20px; font-size: 0.68rem; font-weight: 600;
-      color: rgba(255,255,255,0.9); letter-spacing: 0.4px;
+      color: var(--statusbar-fg); letter-spacing: 0.4px; transition: background .25s, color .25s;
     }
     #statusbar span { display: flex; align-items: center; gap: 5px; }
     #statusbar .sep { opacity: 0.3; }
@@ -590,6 +618,7 @@
 <!-- TOP BAR -->
 <div id="topbar">
   <div style="display:flex;align-items:center;gap:14px">
+    <button id="btn-sidebar-toggle" class="active btn-toggle" title="Mostrar/ocultar proyectos">☰ Proyectos</button>
     <div class="logo">g4lcode <span>beta</span></div>
     <div class="indicator" id="live-dot" title="Preview en vivo activo"></div>
   </div>
@@ -599,6 +628,13 @@
       <select id="theme-select">
         <option value="codeflow">g4lcode</option>
         <option value="one-dark-pro">One Dark Pro</option>
+        <option value="dracula">Dracula</option>
+        <option value="night-owl">Night Owl</option>
+        <option value="tokyo-night">Tokyo Night</option>
+        <option value="catppuccin">Catppuccin</option>
+        <option value="monokai-pro">Monokai Pro</option>
+        <option value="github-dark">GitHub Dark</option>
+        <option value="solarized-dark">Solarized Dark</option>
       </select>
     </div>
     <div class="fontsize-wrap" title="Tamaño de fuente">
@@ -625,6 +661,17 @@
 
 <!-- LAYOUT -->
 <div id="layout">
+
+  <!-- PROJECTS SIDEBAR -->
+  <div id="projects-sidebar">
+    <div id="proj-header">
+      <span>📁 Proyectos</span>
+      <button id="btn-new-proj" title="Nuevo proyecto">+</button>
+    </div>
+    <div id="projects-list"></div>
+  </div>
+  <!-- PROJECTS RESIZER -->
+  <div id="proj-resizer"></div>
 
   <!-- SIDEBAR -->
   <div id="sidebar">
@@ -876,20 +923,51 @@ const CONSOLE_INTERCEPTOR = `
       time: Date.now()
     }, '*');
   });
-  // ── REPL: evalúa expresiones enviadas desde el padre ──
+  // ── REPL: scope persistente con __S para let/const ──
+  const __S = Object.create(null);
   window.addEventListener('message', e => {
     if (!e.data || e.data.type !== 'cf-repl') return;
+    const silent = !!e.data.silent;
+    const expr = e.data.expr.trim();
     try {
-      const result = (0, eval)(e.data.expr);
+      let result;
+      const isLetConst = /^(let|const)\s+([\w$]+)/.test(expr);
+      const isFnClass  = /^(function|class)\s+\w/.test(expr);
+      const isVar      = /^var\s+[\w$]+/.test(expr);
+      // Build inject of known vars from __S
+      const keys = Object.keys(__S);
+      const vals = keys.map(k => __S[k]);
+      const call = (code) => keys.length ? new Function(...keys, 'return ('+code+')(...[])').bind(null)(...vals) : (0,eval)(code);
+
+      if (isLetConst) {
+        const m = expr.match(/^(?:let|const)\s+([\w$]+)(?:\s*=\s*([\s\S]*))?$/);
+        if (m) {
+          const name = m[1], valExpr = (m[2]||'undefined').replace(/;$/, '');
+          result = keys.length ? new Function(...keys,'return ('+valExpr+')')(...vals) : (0,eval)(valExpr);
+          __S[name] = result;
+        }
+      } else if (isFnClass) {
+        result = (0,eval)(expr);
+        const m = expr.match(/^(?:function|class)\s+([\w$]+)/);
+        if (m) { __S[m[1]] = result || window[m[1]]; result = undefined; }
+      } else if (isVar) {
+        const m = expr.match(/^var\s+([\w$]+)(?:\s*=\s*([\s\S]*))?;?$/);
+        result = (0,eval)(expr); // var goes to window scope
+        if (m) __S[m[1]] = result !== undefined ? result : window[m[1]];
+      } else {
+        // expression — eval with __S vars in scope
+        result = keys.length ? new Function(...keys,'return ('+expr+')')(...vals) : (0,eval)(expr);
+      }
+
       let text;
-      if (result === undefined)           text = 'undefined';
-      else if (result === null)           text = 'null';
-      else if (typeof result === 'object') {
-        try { text = JSON.stringify(result, null, 2); } catch(_) { text = String(result); }
-      } else                              text = String(result);
-      window.parent.postMessage({ type: 'cf-repl-result', ok: true, text, time: Date.now() }, '*');
+      if (result === undefined)            text = 'undefined';
+      else if (result === null)            text = 'null';
+      else if (typeof result==='function') text = '[Function: '+(result.name||'anonymous')+']';
+      else if (typeof result==='object')   { try{text=JSON.stringify(result,null,2)}catch(_){text=String(result)} }
+      else                                 text = String(result);
+      window.parent.postMessage({ type:'cf-repl-result', ok:true, text, silent, time:Date.now() }, '*');
     } catch(err) {
-      window.parent.postMessage({ type: 'cf-repl-result', ok: false, text: err.message, time: Date.now() }, '*');
+      window.parent.postMessage({ type:'cf-repl-result', ok:false, text:err.message, silent, time:Date.now() }, '*');
     }
   });
 })();
@@ -919,10 +997,10 @@ const VERBOSE_INTERCEPTOR = `
 
 // ── SCROLLBAR CSS para el iframe ──────────────────────────────
 function getScrollbarCSS() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'one-dark-pro';
-  const bg    = isDark ? '#21252b' : '#0d0e16';
-  const thumb = isDark ? '#3e4451' : '#252838';
-  const accent= isDark ? '#61afef' : '#a78bfa';
+  const s=getComputedStyle(document.documentElement);
+  const bg=s.getPropertyValue('--bg').trim()||'#0d0e16';
+  const thumb=s.getPropertyValue('--border').trim()||'#252838';
+  const accent=s.getPropertyValue('--accent').trim()||'#a78bfa';
   return `::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:${bg}}::-webkit-scrollbar-thumb{background:${thumb};border-radius:4px}::-webkit-scrollbar-thumb:hover{background:${accent}}*{scrollbar-width:thin;scrollbar-color:${thumb} ${bg}}`;
 }
 
@@ -1202,8 +1280,13 @@ resizer.addEventListener('mousedown', () => {
 document.addEventListener('mousemove', e => {
   if (!isResizing) return;
   const layout = document.getElementById('layout');
-  const rect = layout.getBoundingClientRect();
-  const pct = Math.min(Math.max((rect.right - e.clientX) / rect.width * 100, 15), 70);
+  const rect   = layout.getBoundingClientRect();
+  // Excluir sidebar de proyectos del cálculo
+  const projSidebar = document.getElementById('projects-sidebar');
+  const projW = projSidebar ? projSidebar.offsetWidth : 0;
+  const available = rect.width - projW;
+  const fromRight = rect.right - e.clientX;
+  const pct = Math.min(Math.max(fromRight / available * 100, 15), 75);
   previewPanel.style.width = pct + '%';
   if (editor) editor.layout();
 });
@@ -1211,6 +1294,34 @@ document.addEventListener('mouseup', () => {
   if (!isResizing) return;
   isResizing = false; resizer.classList.remove('dragging');
   document.body.style.cursor = ''; document.body.style.userSelect = '';
+});
+
+// Console vertical resizer
+const consoleResizer = document.getElementById('console-resizer');
+const consolePanel   = document.getElementById('console-panel');
+let isConsoleResizing = false, consoleStartY = 0, consoleStartH = 0;
+consoleResizer.addEventListener('mousedown', e => {
+  isConsoleResizing = true;
+  consoleStartY = e.clientY;
+  consoleStartH = consolePanel.offsetHeight;
+  consoleResizer.classList.add('dragging');
+  document.body.style.cursor = 'row-resize';
+  document.body.style.userSelect = 'none';
+  e.stopPropagation();
+});
+document.addEventListener('mousemove', e => {
+  if (!isConsoleResizing) return;
+  const delta  = consoleStartY - e.clientY;
+  const newH   = Math.min(Math.max(consoleStartH + delta, 28), window.innerHeight * 0.7);
+  consolePanel.style.height = newH + 'px';
+  consolePanel.classList.remove('collapsed');
+});
+document.addEventListener('mouseup', () => {
+  if (!isConsoleResizing) return;
+  isConsoleResizing = false;
+  consoleResizer.classList.remove('dragging');
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
 });
 
 // Formato
@@ -1223,7 +1334,11 @@ document.getElementById('btn-format').addEventListener('click', formatCode);
 
 // Reset
 document.getElementById('btn-reset').addEventListener('click', () => {
+  if (!editor) { showToast('Editor no listo'); return; }
   if (!confirm('¿Resetear todo el código a los valores por defecto?')) return;
+  const p = getActiveProject();
+  p.files = { html:DEFAULTS.html, css:DEFAULTS.css, js:DEFAULTS.js, md:DEFAULTS.md };
+  LS.set(PROJ_KEY, projects);
   Object.entries(DEFAULTS).forEach(([lang, code]) => models[lang]?.setValue(code));
   renderPreview();
   showToast('Código reseteado');
@@ -1231,6 +1346,7 @@ document.getElementById('btn-reset').addEventListener('click', () => {
 
 // Share
 document.getElementById('btn-share').addEventListener('click', () => {
+  if (!editor) { showToast('Editor no listo'); return; }
   const data = {};
   Object.keys(models).forEach(lang => { data[lang] = models[lang].getValue(); });
   const hash = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
@@ -1258,167 +1374,336 @@ window.addEventListener('message', e => {
     if (e.data.method === 'verbose' && !devtoolsMode) return;
     addConsoleLine(e.data.method, e.data.text);
   }
-  if (e.data.type === 'cf-repl-result') {
-    if (e.data.ok) addConsoleLine('repl-out', e.data.text);
-    else           addConsoleLine('repl-err', '✖ ' + e.data.text);
-  }
+  // REPL now evaluates in parent — no iframe message needed
 });
 
-// ── REPL INPUT ────────────────────────────────────────────────
+// ── REPL INPUT ──────────────────────────────────────────────────────────────
+// El scope vive en el PADRE — no hay doble-escape de strings ni problemas de template literals
 const replInput   = document.getElementById('repl-input');
 const replHistory = [];
 let replHistIdx   = -1;
+
+// Scope persistente del REPL
+const REPL_SCOPE = Object.create(null);
+
+function replEval(expr) {
+  expr = expr.trim();
+  if (!expr) return;
+
+  const isLetConst = /^(let|const)\s+[\w$]/.test(expr);
+  const isFnDecl   = /^function\s+\w/.test(expr);
+  const isClassDecl= /^class\s+\w/.test(expr);
+  const isVar      = /^var\s+[\w$]/.test(expr);
+
+  const scopeKeys = Object.keys(REPL_SCOPE);
+  const scopeVals = scopeKeys.map(k => REPL_SCOPE[k]);
+
+  // Helper: evalúa una expresión con acceso al scope acumulado
+  function evalWithScope(code) {
+    if (!scopeKeys.length) return eval(code);
+    return new Function(...scopeKeys, '"use strict"; return (' + code + ')')(...scopeVals);
+  }
+
+  try {
+    let result, displayResult;
+
+    if (isLetConst) {
+      // Parsear: "let name = expr" o "let name"
+      const m = expr.match(/^(?:let|const)\s+([\w$]+)(?:\s*=\s*([\s\S]*))?;?$/);
+      if (!m) throw new SyntaxError('Declaración inválida');
+      const varName = m[1];
+      const valSrc  = m[2] ? m[2].replace(/;+$/, '') : 'undefined';
+      result = evalWithScope(valSrc);
+      REPL_SCOPE[varName] = result;
+      displayResult = result;
+
+    } else if (isFnDecl || isClassDecl) {
+      // function foo(){} / class Foo{} — eval directo, guardar en scope
+      result = eval(expr);
+      const m = expr.match(/^(?:function|class)\s+([\w$]+)/);
+      if (m) REPL_SCOPE[m[1]] = result || eval(m[1]);
+      displayResult = undefined;
+
+    } else if (isVar) {
+      // var — eval con scope (para que acceda a let/const previos), guarda en scope
+      const m = expr.match(/^var\s+([\w$]+)(?:\s*=\s*([\s\S]*))?;?$/);
+      if (m) {
+        const varName = m[1];
+        const valSrc  = m[2] ? m[2].replace(/;+$/, '') : 'undefined';
+        result = evalWithScope(valSrc);
+        REPL_SCOPE[varName] = result;
+        displayResult = result;
+      } else {
+        displayResult = evalWithScope(expr);
+      }
+
+    } else {
+      // Expresión normal — evalúa con scope
+      displayResult = evalWithScope(expr);
+    }
+
+    // Formatear resultado
+    let text;
+    if (displayResult === undefined)             text = 'undefined';
+    else if (displayResult === null)             text = 'null';
+    else if (typeof displayResult === 'function') text = '[Function: ' + (displayResult.name || 'anonymous') + ']';
+    else if (typeof displayResult === 'object') {
+      try { text = JSON.stringify(displayResult, null, 2); }
+      catch { text = String(displayResult); }
+    } else {
+      text = String(displayResult);
+    }
+    addConsoleLine('repl-out', text);
+
+  } catch(err) {
+    addConsoleLine('repl-err', '✖ ' + err.message);
+  }
+}
 
 replInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     const expr = replInput.value.trim();
     if (!expr) return;
-    // Guardar en historial
     replHistory.unshift(expr);
-    if (replHistory.length > 50) replHistory.pop();
+    if (replHistory.length > 100) replHistory.pop();
     replHistIdx = -1;
-    // Mostrar el input del usuario en la consola
     addConsoleLine('repl-in', expr);
     replInput.value = '';
-    // Enviar al iframe para evaluar en su contexto
-    const frame = document.getElementById('preview-frame');
-    frame.contentWindow?.postMessage({ type: 'cf-repl', expr }, '*');
+    replEval(expr);
   }
-  // Historial con flechas
   if (e.key === 'ArrowUp') {
     e.preventDefault();
-    if (replHistIdx < replHistory.length - 1) {
-      replHistIdx++;
-      replInput.value = replHistory[replHistIdx];
-    }
+    if (replHistIdx < replHistory.length - 1) { replHistIdx++; replInput.value = replHistory[replHistIdx]; }
   }
   if (e.key === 'ArrowDown') {
     e.preventDefault();
-    if (replHistIdx > 0) {
-      replHistIdx--;
-      replInput.value = replHistory[replHistIdx];
-    } else {
-      replHistIdx = -1;
-      replInput.value = '';
-    }
+    if (replHistIdx > 0) { replHistIdx--; replInput.value = replHistory[replHistIdx]; }
+    else { replHistIdx = -1; replInput.value = ''; }
   }
 });
 
-// Click en la consola → foco al input
-document.getElementById('console-output').addEventListener('click', () => {
-  replInput.focus();
-});
+// ── STORAGE HELPERS ──────────────────────────────────────────
+const LS = {
+  get(k,def){ try{const v=localStorage.getItem(k);return v!=null?JSON.parse(v):def}catch{return def} },
+  set(k,v)  { try{localStorage.setItem(k,JSON.stringify(v))}catch{} },
+};
 
-// Console clear button
-document.getElementById('console-btn-clear').addEventListener('click', e => {
-  e.stopPropagation(); clearConsole(false);
-});
+// ── PROJECTS SYSTEM ───────────────────────────────────────────
+const PROJ_KEY='g4lcode_projects', ACTIVE_KEY='g4lcode_active';
+function defaultProject(name){
+  return {id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,files:{html:DEFAULTS.html,css:DEFAULTS.css,js:DEFAULTS.js,md:DEFAULTS.md}};
+}
+let projects=LS.get(PROJ_KEY,null);
+if(!projects||!projects.length){projects=[defaultProject('Mi Proyecto')];LS.set(PROJ_KEY,projects);}
+let activeProjectId=LS.get(ACTIVE_KEY,projects[0].id);
+if(!projects.find(p=>p.id===activeProjectId)) activeProjectId=projects[0].id;
 
-// Console collapse
-document.getElementById('console-topbar').addEventListener('click', () => {
-  document.getElementById('console-panel').classList.toggle('collapsed');
+function getActiveProject(){return projects.find(p=>p.id===activeProjectId)||projects[0];}
+function saveCurrentFilesToProject(){
+  const p=getActiveProject(); if(!p||!models.html) return;
+  p.files={html:models.html.getValue(),css:models.css.getValue(),js:models.js.getValue(),md:models.md.getValue()};
+  LS.set(PROJ_KEY,projects);
+}
+function loadProject(id){
+  saveCurrentFilesToProject();
+  activeProjectId=id; LS.set(ACTIVE_KEY,id);
+  const p=getActiveProject();
+  Object.entries(p.files).forEach(([lang,code])=>models[lang]?.setValue(code));
+  renderPreview(); renderProjectsList(); showToast('Proyecto: '+p.name);
+}
+function renderProjectsList(){
+  const list=document.getElementById('projects-list'); list.innerHTML='';
+  projects.forEach(p=>{
+    const item=document.createElement('div');
+    item.className='proj-item'+(p.id===activeProjectId?' active':'');
+    item.innerHTML=`<span class="proj-name" title="${p.name}">${p.name}</span><button class="proj-del" title="Eliminar">✕</button>`;
+    item.addEventListener('click',ev=>{if(!ev.target.classList.contains('proj-del')&&p.id!==activeProjectId)loadProject(p.id);});
+    item.querySelector('.proj-name').addEventListener('dblclick',ev=>{
+      ev.stopPropagation();
+      const span=item.querySelector('.proj-name');
+      const inp=document.createElement('input'); inp.id='proj-rename-input'; inp.value=p.name;
+      span.replaceWith(inp); inp.focus(); inp.select();
+      const commit=()=>{p.name=inp.value.trim()||p.name;LS.set(PROJ_KEY,projects);renderProjectsList();};
+      inp.addEventListener('blur',commit);
+      inp.addEventListener('keydown',e2=>{if(e2.key==='Enter')inp.blur();if(e2.key==='Escape'){inp.value=p.name;inp.blur();}});
+    });
+    item.querySelector('.proj-del').addEventListener('click',ev=>{
+      ev.stopPropagation();
+      if(projects.length===1){showToast('No puedes eliminar el único proyecto');return;}
+      if(!confirm('¿Eliminar "'+p.name+'"?'))return;
+      projects=projects.filter(x=>x.id!==p.id); LS.set(PROJ_KEY,projects);
+      if(activeProjectId===p.id)loadProject(projects[0].id); else renderProjectsList();
+    });
+    list.appendChild(item);
+  });
+}
+document.getElementById('btn-new-proj').addEventListener('click',()=>{
+  const name=prompt('Nombre del proyecto:','Nuevo Proyecto'); if(!name) return;
+  saveCurrentFilesToProject();
+  const p=defaultProject(name.trim()); projects.push(p); LS.set(PROJ_KEY,projects);
+  activeProjectId=p.id; LS.set(ACTIVE_KEY,p.id);
+  Object.entries(p.files).forEach(([lang,code])=>models[lang]?.setValue(code));
+  renderPreview(); renderProjectsList(); showToast('Proyecto creado: '+p.name);
 });
+let sidebarVisible=true;
+const projSidebarEl = document.getElementById('projects-sidebar');
 
-// Console vertical resizer
-const consoleResizer = document.getElementById('console-resizer');
-const consolePanel   = document.getElementById('console-panel');
-let isCResizing = false, cStartY = 0, cStartH = 0;
-consoleResizer.addEventListener('mousedown', e => {
-  isCResizing = true; cStartY = e.clientY; cStartH = consolePanel.offsetHeight;
-  document.body.style.cursor = 'row-resize'; document.body.style.userSelect = 'none';
+// ── Projects sidebar resize ──
+const projResizer = document.getElementById('proj-resizer');
+let isProjResizing = false, projStartX = 0, projStartW = 0;
+projResizer.addEventListener('mousedown', e => {
+  isProjResizing = true;
+  projStartX = e.clientX;
+  projStartW = projSidebarEl.offsetWidth;
+  projResizer.classList.add('dragging');
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
   e.stopPropagation();
 });
 document.addEventListener('mousemove', e => {
-  if (!isCResizing) return;
-  const maxH = document.getElementById('preview-panel').offsetHeight - 32;
-  const newH = Math.min(Math.max(cStartH + (cStartY - e.clientY), 28), maxH);
-  consolePanel.style.height = newH + 'px';
-  if (newH <= 32) consolePanel.classList.add('collapsed');
-  else consolePanel.classList.remove('collapsed');
+  if (!isProjResizing) return;
+  const newW = Math.min(Math.max(projStartW + (e.clientX - projStartX), 140), 420);
+  projSidebarEl.style.width = newW + 'px';
   if (editor) editor.layout();
 });
 document.addEventListener('mouseup', () => {
-  if (!isCResizing) return;
-  isCResizing = false; document.body.style.cursor = ''; document.body.style.userSelect = '';
+  if (!isProjResizing) return;
+  isProjResizing = false;
+  projResizer.classList.remove('dragging');
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
 });
 
-// Toggle preview & consola
-const btnTogglePreview = document.getElementById('btn-toggle-preview');
-const btnToggleConsole = document.getElementById('btn-toggle-console');
-let previewVisible = true, consoleVisible = true;
+// ── Toggle sidebar ──
+let sidebarSavedWidth = 210;
+document.getElementById('btn-sidebar-toggle').addEventListener('click', () => {
+  sidebarVisible = !sidebarVisible;
+  if (!sidebarVisible) {
+    sidebarSavedWidth = projSidebarEl.offsetWidth || sidebarSavedWidth;
+    projSidebarEl.classList.add('collapsed');
+    projResizer.style.display = 'none';
+  } else {
+    projSidebarEl.classList.remove('collapsed');
+    projSidebarEl.style.width = sidebarSavedWidth + 'px';
+    projResizer.style.display = '';
+  }
+  document.getElementById('btn-sidebar-toggle').classList.toggle('active', sidebarVisible);
+  if (editor) editor.layout();
+});
+setInterval(saveCurrentFilesToProject,2000);
 
-function syncConsoleLayout() {
-  const panel      = document.getElementById('preview-panel');
-  const resEl      = document.getElementById('resizer');
-  const prevTopbar = document.getElementById('preview-topbar');
-  const prevBody   = document.getElementById('preview-body');
-  const conPanel   = document.getElementById('console-panel');
-  const conResizer = document.getElementById('console-resizer');
+// ── Toggle Preview & Console ──
+let previewVisible = true;
+let consoleVisible = true;
 
-  // El panel derecho desaparece solo si AMBOS están ocultos
-  const panelVisible = previewVisible || consoleVisible;
-  panel.classList.toggle('fully-hidden', !panelVisible);
-  resEl.classList.toggle('panel-hidden', !panelVisible);
+function updatePanelVisibility() {
+  const previewPanel  = document.getElementById('preview-panel');
+  const previewTopbar = document.getElementById('preview-topbar');
+  const previewBody   = document.getElementById('preview-body');
+  const consolePanel  = document.getElementById('console-panel');
+  const consoleResizer= document.getElementById('console-resizer');
+  const resizerEl     = document.getElementById('resizer');
+  const btnPrev       = document.getElementById('btn-toggle-preview');
+  const btnCons       = document.getElementById('btn-toggle-console');
+  const bothHidden    = !previewVisible && !consoleVisible;
 
-  // Preview-body y topbar solo visibles si preview activo
-  prevTopbar.style.display = previewVisible ? '' : 'none';
-  prevBody.style.display   = previewVisible ? '' : 'none';
+  previewTopbar.style.display = previewVisible ? '' : 'none';
+  previewBody.style.display   = previewVisible ? '' : 'none';
 
-  // Consola
-  conPanel.classList.toggle('force-hidden', !consoleVisible);
-  if (conResizer) conResizer.classList.toggle('hidden', !consoleVisible || !previewVisible);
+  if (!consoleVisible) {
+    consolePanel.classList.add('force-hidden');
+    consoleResizer.classList.add('hidden');
+  } else {
+    consolePanel.classList.remove('force-hidden');
+    consoleResizer.classList.remove('hidden');
+  }
 
-  // Si preview está oculto pero consola visible → consola ocupa todo el panel
-  conPanel.classList.toggle('console-expand', !previewVisible && consoleVisible);
+  if (!previewVisible && consoleVisible) {
+    consolePanel.classList.add('console-expand');
+  } else {
+    consolePanel.classList.remove('console-expand');
+  }
+
+  if (bothHidden) {
+    previewPanel.classList.add('fully-hidden');
+    resizerEl.classList.add('panel-hidden');
+  } else {
+    previewPanel.classList.remove('fully-hidden');
+    resizerEl.classList.remove('panel-hidden');
+  }
+
+  btnPrev.classList.toggle('active', previewVisible);
+  btnPrev.classList.toggle('hidden-panel', !previewVisible);
+  btnCons.classList.toggle('active', consoleVisible);
+  btnCons.classList.toggle('hidden-panel', !consoleVisible);
 
   if (editor) editor.layout();
 }
 
-btnTogglePreview.addEventListener('click', () => {
+document.getElementById('btn-toggle-preview').addEventListener('click', () => {
   previewVisible = !previewVisible;
-  btnTogglePreview.classList.toggle('active', previewVisible);
-  btnTogglePreview.classList.toggle('hidden-panel', !previewVisible);
-  btnTogglePreview.querySelector('.tgl-icon').textContent = previewVisible ? '⬜' : '▣';
-  syncConsoleLayout();
-  showToast(previewVisible ? 'Vista previa visible' : 'Vista previa oculta');
+  updatePanelVisibility();
 });
 
-btnToggleConsole.addEventListener('click', () => {
+document.getElementById('btn-toggle-console').addEventListener('click', () => {
   consoleVisible = !consoleVisible;
-  btnToggleConsole.classList.toggle('active', consoleVisible);
-  btnToggleConsole.classList.toggle('hidden-panel', !consoleVisible);
-  btnToggleConsole.querySelector('.tgl-icon').textContent = consoleVisible ? '▸' : '▪';
-  syncConsoleLayout();
-  showToast(consoleVisible ? 'Consola visible' : 'Consola oculta');
+  updatePanelVisibility();
 });
 
-// DevTools mode
-document.getElementById('btn-devtools').addEventListener('click', e => {
-  e.stopPropagation();
-  devtoolsMode = !devtoolsMode;
-  const btn   = document.getElementById('btn-devtools');
-  const panel = document.getElementById('console-panel');
-  btn.classList.toggle('active', devtoolsMode);
-  panel.classList.toggle('devtools-mode', devtoolsMode);
-  btn.textContent = devtoolsMode ? '⬡ DevTools ON' : '⬡ DevTools';
-  renderPreview();
-  showToast(devtoolsMode ? 'DevTools activo — verbose ON' : 'DevTools desactivado');
-});
+// ── Font size ─────────────────────────────────────────────────
+let currentFontSize = LS.get('g4lcode_fontsize', 13.5);
+document.getElementById('fs-value').textContent = Math.round(currentFontSize);
 
-// Font size
-let currentFontSize = 13.5;
-const FS_MIN = 10, FS_MAX = 24, FS_STEP = 0.5;
-function setFontSize(size) {
-  currentFontSize = Math.min(Math.max(size, FS_MIN), FS_MAX);
-  if (editor) editor.updateOptions({ fontSize: currentFontSize });
+document.getElementById('fs-down').addEventListener('click', () => {
+  if (currentFontSize <= 9) return;
+  currentFontSize = Math.max(9, currentFontSize - 1);
   document.getElementById('fs-value').textContent = Math.round(currentFontSize);
-}
-document.getElementById('fs-up').addEventListener('click', () => { setFontSize(currentFontSize + FS_STEP); showToast(`Fuente: ${Math.round(currentFontSize)}px`); });
-document.getElementById('fs-down').addEventListener('click', () => { setFontSize(currentFontSize - FS_STEP); showToast(`Fuente: ${Math.round(currentFontSize)}px`); });
+  if (editor) editor.updateOptions({ fontSize: currentFontSize });
+  LS.set('g4lcode_fontsize', currentFontSize);
+});
+document.getElementById('fs-up').addEventListener('click', () => {
+  if (currentFontSize >= 28) return;
+  currentFontSize = Math.min(28, currentFontSize + 1);
+  document.getElementById('fs-value').textContent = Math.round(currentFontSize);
+  if (editor) editor.updateOptions({ fontSize: currentFontSize });
+  LS.set('g4lcode_fontsize', currentFontSize);
+});
 
-// Theme switcher
+// ── THEME SWITCHER ────────────────────────────────────────────
 let shikiReady = false, shikiLoading = false, pendingTheme = null;
 
+// Temas Shiki disponibles (los que vienen built-in en Shiki)
+const SHIKI_BUILTIN = new Set([
+  'one-dark-pro','dracula','night-owl','solarized-dark',
+  'github-dark','monokai','tokyo-night','catppuccin-mocha'
+]);
+
+// Mapa de nombre interno → nombre Shiki
+const SHIKI_NAME_MAP = {
+  'one-dark-pro':   'one-dark-pro',
+  'dracula':        'dracula',
+  'night-owl':      'night-owl',
+  'solarized-dark': 'solarized-dark',
+  'github-dark':    'github-dark',
+  'monokai-pro':    'monokai',
+  'tokyo-night':    'tokyo-night',
+  'catppuccin':     'catppuccin-mocha',
+};
+
+// Colores de UI (statusbar, borders, etc.) por tema — no los da Shiki
+const THEME_UI_COLORS = {
+  codeflow:        { bg:'#0d0e16', surface:'#13141e', border:'#252838', accent:'#a78bfa', accent2:'#34d399', accent3:'#fbbf24', accent4:'#f472b6', text:'#e8eaf8', muted:'#6572a0', consoleBg:'#090a12', sbBg:'#a78bfa', sbFg:'#fff' },
+  'one-dark-pro':  { bg:'#21252b', surface:'#282c34', border:'#3e4451', accent:'#61afef', accent2:'#98c379', accent3:'#e5c07b', accent4:'#c678dd', text:'#abb2bf', muted:'#5c6370', consoleBg:'#1a1d23', sbBg:'#21252b', sbFg:'#61afef' },
+  dracula:         { bg:'#1e1f29', surface:'#282a36', border:'#44475a', accent:'#bd93f9', accent2:'#50fa7b', accent3:'#f1fa8c', accent4:'#ff79c6', text:'#f8f8f2', muted:'#6272a4', consoleBg:'#181920', sbBg:'#bd93f9', sbFg:'#282a36' },
+  'night-owl':     { bg:'#011627', surface:'#021d2f', border:'#1d3b53', accent:'#82aaff', accent2:'#addb67', accent3:'#ffcb8b', accent4:'#c792ea', text:'#d6deeb', muted:'#5f7e97', consoleBg:'#010e1a', sbBg:'#082d47', sbFg:'#82aaff' },
+  'solarized-dark':{ bg:'#002b36', surface:'#073642', border:'#194551', accent:'#268bd2', accent2:'#859900', accent3:'#b58900', accent4:'#d33682', text:'#839496', muted:'#4a6872', consoleBg:'#001e27', sbBg:'#073642', sbFg:'#268bd2' },
+  'github-dark':   { bg:'#0d1117', surface:'#161b22', border:'#30363d', accent:'#58a6ff', accent2:'#3fb950', accent3:'#d29922', accent4:'#f47067', text:'#e6edf3', muted:'#484f58', consoleBg:'#090d12', sbBg:'#161b22', sbFg:'#58a6ff' },
+  'monokai-pro':   { bg:'#2d2a2e', surface:'#343135', border:'#4a464d', accent:'#ab9df2', accent2:'#a9dc76', accent3:'#ffd866', accent4:'#ff6188', text:'#fcfcfa', muted:'#727072', consoleBg:'#221f22', sbBg:'#ff6188', sbFg:'#2d2a2e' },
+  'tokyo-night':   { bg:'#1a1b26', surface:'#1f2335', border:'#292e42', accent:'#7aa2f7', accent2:'#9ece6a', accent3:'#e0af68', accent4:'#f7768e', text:'#c0caf5', muted:'#565f89', consoleBg:'#13141f', sbBg:'#7aa2f7', sbFg:'#1a1b26' },
+  catppuccin:      { bg:'#1e1e2e', surface:'#181825', border:'#313244', accent:'#cba6f7', accent2:'#a6e3a1', accent3:'#f9e2af', accent4:'#f38ba8', text:'#cdd6f4', muted:'#6c7086', consoleBg:'#11111b', sbBg:'#cba6f7', sbFg:'#1e1e2e' },
+};
+
+// Tema custom codeflow para Shiki (TextMate scopes)
 const CODEFLOW_SHIKI_THEME = {
   name: 'codeflow', type: 'dark',
   colors: {
@@ -1430,7 +1715,7 @@ const CODEFLOW_SHIKI_THEME = {
   },
   tokenColors: [
     { scope:['comment','punctuation.definition.comment'], settings:{ foreground:'#5a6390', fontStyle:'italic' } },
-    { scope:['keyword','storage'], settings:{ foreground:'#a78bfa' } },
+    { scope:['keyword','storage.type','storage.modifier'], settings:{ foreground:'#a78bfa' } },
     { scope:['keyword.control','keyword.control.flow'], settings:{ foreground:'#f472b6', fontStyle:'bold' } },
     { scope:['string','string.quoted','string.template'], settings:{ foreground:'#34d399' } },
     { scope:['constant.numeric'], settings:{ foreground:'#fbbf24' } },
@@ -1444,25 +1729,50 @@ const CODEFLOW_SHIKI_THEME = {
   ],
 };
 
+function applyUIColors(theme) {
+  const c = THEME_UI_COLORS[theme] || THEME_UI_COLORS['codeflow'];
+  const r = document.documentElement;
+  r.style.setProperty('--bg',        c.bg);
+  r.style.setProperty('--surface',   c.surface);
+  r.style.setProperty('--border',    c.border);
+  r.style.setProperty('--accent',    c.accent);
+  r.style.setProperty('--accent2',   c.accent2);
+  r.style.setProperty('--accent3',   c.accent3);
+  r.style.setProperty('--accent4',   c.accent4);
+  r.style.setProperty('--text',      c.text);
+  r.style.setProperty('--muted',     c.muted);
+  r.style.setProperty('--console-bg',c.consoleBg);
+  r.style.setProperty('--statusbar-bg', c.sbBg);
+  r.style.setProperty('--statusbar-fg', c.sbFg);
+  const dimC = c.accent.replace('#','');
+  r.style.setProperty('--accent-dim',  `rgba(${hexToRgb(dimC)},.09)`);
+  r.style.setProperty('--accent-mid',  `rgba(${hexToRgb(dimC)},.17)`);
+  r.style.setProperty('--accent-soft', `rgba(${hexToRgb(dimC)},.22)`);
+}
+function hexToRgb(hex) {
+  const n = parseInt(hex, 16);
+  return `${(n>>16)&255},${(n>>8)&255},${n&255}`;
+}
+
 async function initShiki(targetTheme) {
   if (shikiLoading) { pendingTheme = targetTheme; return; }
   shikiLoading = true;
   if (!shikiReady) showToast('Cargando tema...');
-  document.documentElement.setAttribute('data-theme', targetTheme);
   try {
     const { createHighlighter } = await import('shiki');
     const { shikiToMonaco }     = await import('@shikijs/monaco');
+    const shikiThemeNames = Object.values(SHIKI_NAME_MAP);
     const highlighter = await createHighlighter({
-      themes: ['one-dark-pro', CODEFLOW_SHIKI_THEME],
-      langs: ['html','css','javascript','markdown'],
+      themes: [CODEFLOW_SHIKI_THEME, ...shikiThemeNames],
+      langs:  ['html','css','javascript','markdown'],
     });
     shikiToMonaco(highlighter, monaco);
     shikiReady = true;
-    monaco.editor.setTheme(targetTheme);
-    showToast(`Tema: ${targetTheme === 'one-dark-pro' ? 'One Dark Pro' : 'g4lcode'}`);
-  } catch(e) {
-    monaco.editor.setTheme(targetTheme === 'one-dark-pro' ? 'one-dark-pro' : 'codeflow');
+    const shikiName = SHIKI_NAME_MAP[targetTheme] || targetTheme;
+    monaco.editor.setTheme(shikiName);
     showToast('Tema aplicado');
+  } catch(e) {
+    console.warn('Shiki failed, using Monaco fallback', e);
   }
   shikiLoading = false;
   if (pendingTheme) { const t = pendingTheme; pendingTheme = null; await applyTheme(t); }
@@ -1470,9 +1780,11 @@ async function initShiki(targetTheme) {
 
 async function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
+  LS.set('g4lcode_theme', theme);
+  applyUIColors(theme);
   if (shikiReady) {
-    monaco.editor.setTheme(theme);
-    showToast(`Tema: ${theme === 'one-dark-pro' ? 'One Dark Pro' : 'g4lcode'}`);
+    const shikiName = SHIKI_NAME_MAP[theme] || theme;
+    monaco.editor.setTheme(shikiName);
   } else {
     await initShiki(theme);
   }
@@ -1507,76 +1819,42 @@ require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-edi
 
 require(['vs/editor/editor.main'], () => {
 
-  // ── Temas ──────────────────────────────────────────────────
-  monaco.editor.defineTheme('codeflow', {
+  // ── Tema inicial (Monaco fallback hasta que Shiki cargue) ──────
+  monaco.editor.defineTheme('codeflow-fallback', {
     base: 'vs-dark', inherit: true,
     rules: [
-      { token:'comment',           foreground:'5a6390', fontStyle:'italic' },
-      { token:'keyword',           foreground:'a78bfa' },
-      { token:'keyword.control',   foreground:'f472b6', fontStyle:'bold' },
-      { token:'storage',           foreground:'a78bfa' },
-      { token:'string',            foreground:'34d399' },
-      { token:'number',            foreground:'fbbf24' },
-      { token:'operator',          foreground:'67e8f9' },
-      { token:'type',              foreground:'38bdf8' },
-      { token:'variable',          foreground:'e8eaf8' },
-      { token:'variable.other',    foreground:'c4b5fd' },
-      { token:'function',          foreground:'60a5fa', fontStyle:'bold' },
-      { token:'tag',               foreground:'f472b6' },
-      { token:'attribute.name',    foreground:'34d399' },
-      { token:'attribute.value',   foreground:'fbbf24' },
-      { token:'delimiter',         foreground:'6572a0' },
-      { token:'delimiter.html',    foreground:'818cf8' },
-      { token:'metatag',           foreground:'a78bfa' },
+      { token:'comment',         foreground:'5a6390', fontStyle:'italic' },
+      { token:'keyword',         foreground:'a78bfa' },
+      { token:'string',          foreground:'34d399' },
+      { token:'number',          foreground:'fbbf24' },
+      { token:'operator',        foreground:'67e8f9' },
     ],
     colors: {
       'editor.background':'#0d0e16','editor.foreground':'#e8eaf8',
       'editorLineNumber.foreground':'#2e3255','editorLineNumber.activeForeground':'#a78bfa',
       'editor.selectionBackground':'#a78bfa28','editor.lineHighlightBackground':'#13141e',
-      'editorCursor.foreground':'#f472b6','editorIndentGuide.background':'#252838',
-      'editorWidget.background':'#13141e','editorWidget.border':'#252838',
-      'editor.selectionHighlightBackground':'#a78bfa18',
-      'editorBracketMatch.background':'#a78bfa33','editorBracketMatch.border':'#a78bfa',
+      'editorCursor.foreground':'#f472b6','editorWidget.background':'#13141e','editorWidget.border':'#252838',
     }
   });
 
-  monaco.editor.defineTheme('one-dark-pro', {
-    base: 'vs-dark', inherit: true,
-    rules: [
-      { token:'comment',         foreground:'5c6370', fontStyle:'italic' },
-      { token:'keyword',         foreground:'c678dd' },
-      { token:'keyword.control', foreground:'c678dd' },
-      { token:'storage',         foreground:'c678dd' },
-      { token:'string',          foreground:'98c379' },
-      { token:'number',          foreground:'d19a66' },
-      { token:'operator',        foreground:'56b6c2' },
-      { token:'type',            foreground:'e5c07b' },
-      { token:'variable',        foreground:'e06c75' },
-      { token:'function',        foreground:'61afef' },
-      { token:'tag',             foreground:'e06c75' },
-      { token:'attribute.name',  foreground:'d19a66' },
-      { token:'attribute.value', foreground:'98c379' },
-    ],
-    colors: {
-      'editor.background':'#21252b','editor.foreground':'#abb2bf',
-      'editorLineNumber.foreground':'#495162','editorLineNumber.activeForeground':'#abb2bf',
-      'editor.selectionBackground':'#3e4451','editor.lineHighlightBackground':'#2c313c',
-      'editorCursor.foreground':'#528bff','editorWidget.background':'#1b1f27',
-      'editorWidget.border':'#181a1f',
-    }
-  });
-
-  // ── Modelos ────────────────────────────────────────────────
+  // ── Modelos — carga desde proyecto activo ─────────────────────
   const langMap = { html:'html', css:'css', js:'javascript', md:'markdown' };
+  const _proj = getActiveProject();
   Object.entries(DEFAULTS).forEach(([lang, code]) => {
-    models[lang] = monaco.editor.createModel(code, langMap[lang]);
+    models[lang] = monaco.editor.createModel(_proj.files[lang]||code, langMap[lang]);
   });
 
-  // ── Editor ────────────────────────────────────────────────
+  // ── Editor ───────────────────────────────────────────────────
+  const _savedTheme = LS.get('g4lcode_theme','codeflow');
+  document.documentElement.setAttribute('data-theme', _savedTheme);
+  applyUIColors(_savedTheme);
+  const _thSel = document.getElementById('theme-select');
+  if(_thSel) _thSel.value = _savedTheme;
+
   editor = monaco.editor.create(document.getElementById('monaco-container'), {
     model: models.html,
-    theme: 'codeflow',
-    fontSize: 13.5,
+    theme: 'codeflow-fallback',
+    fontSize: currentFontSize,
     fontFamily: "'JetBrains Mono', monospace",
     fontLigatures: true,
     lineNumbers: 'on',
@@ -1604,13 +1882,22 @@ require(['vs/editor/editor.main'], () => {
   editor.onDidChangeCursorPosition(e => {
     document.getElementById('sb-pos').textContent = `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
   });
-  editor.onDidChangeModelContent(() => {
-    const val = editor.getValue();
-    document.getElementById('sb-chars').textContent = `${val.length} chars`;
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(renderPreview, 300);
-  });
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, formatCode);
+
+  // ── Content change: save project ──────────────────────────
+  const _origContentChange = editor.onDidChangeModelContent;
+  editor.onDidChangeModelContent(()=>{
+    const val=editor.getValue();
+    document.getElementById('sb-chars').textContent=`${val.length} chars`;
+    clearTimeout(debounceTimer);
+    debounceTimer=setTimeout(()=>{renderPreview();saveCurrentFilesToProject();},300);
+  });
+
+  // Init projects list
+  renderProjectsList();
+
+  // ── Cargar Shiki con el tema guardado ─────────────────────────
+  initShiki(_savedTheme);
 
   // ── Emmet Tab ─────────────────────────────────────────────
   editor.onKeyDown(e => {
